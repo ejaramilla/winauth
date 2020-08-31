@@ -173,16 +173,6 @@ namespace WinAuth.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap GlyphIcon {
-            get {
-                object obj = ResourceManager.GetObject("GlyphIcon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap GoogleAuthenticatorIcon {
             get {
                 object obj = ResourceManager.GetObject("GoogleAuthenticatorIcon", resourceCulture);
@@ -196,16 +186,6 @@ namespace WinAuth.Properties {
         internal static System.Drawing.Bitmap GoogleIcon {
             get {
                 object obj = ResourceManager.GetObject("GoogleIcon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap GuildWarsAuthenticatorIcon {
-            get {
-                object obj = ResourceManager.GetObject("GuildWarsAuthenticatorIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -296,26 +276,6 @@ namespace WinAuth.Properties {
         internal static System.Drawing.Bitmap SteamIcon {
             get {
                 object obj = ResourceManager.GetObject("SteamIcon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap trion {
-            get {
-                object obj = ResourceManager.GetObject("trion", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap TrionAuthenticatorIcon {
-            get {
-                object obj = ResourceManager.GetObject("TrionAuthenticatorIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

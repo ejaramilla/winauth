@@ -1047,11 +1047,6 @@ namespace WinAuth
 			menuitem.Click += ContextMenu_Click;
 			this.ContextMenuStrip.Items.Add(menuitem);
 			//
-			menuitem = new ToolStripMenuItem(strings.ShowSerialKeyAndDeviceId + "...");
-			menuitem.Name = "showTrionSecretMenuItem";
-			menuitem.Click += ContextMenu_Click;
-			this.ContextMenuStrip.Items.Add(menuitem);
-			//
 			menuitem = new ToolStripMenuItem(strings.ShowRevocation + "...");
 			menuitem.Name = "showSteamSecretMenuItem";
 			menuitem.Click += ContextMenu_Click;
@@ -1197,9 +1192,6 @@ namespace WinAuth
 			//
 			menuitem = menu.Items.Cast<ToolStripItem>().Where(i => i.Name == "showGoogleSecretMenuItem").FirstOrDefault() as ToolStripMenuItem;
 			menuitem.Visible = (auth.AuthenticatorData is GoogleAuthenticator || auth.AuthenticatorData is HOTPAuthenticator);
-			//
-			menuitem = menu.Items.Cast<ToolStripItem>().Where(i => i.Name == "showTrionSecretMenuItem").FirstOrDefault() as ToolStripMenuItem;
-			menuitem.Visible = (auth.AuthenticatorData is TrionAuthenticator);
 			//
 			menuitem = menu.Items.Cast<ToolStripItem>().Where(i => i.Name == "showSteamSecretMenuItem").FirstOrDefault() as ToolStripMenuItem;
 			menuitem.Visible = (auth.AuthenticatorData is SteamAuthenticator);
@@ -1465,29 +1457,6 @@ namespace WinAuth
 
 					// show the secret key for Google authenticator				
 					ShowSecretKeyForm form = new ShowSecretKeyForm();
-					form.CurrentAuthenticator = auth;
-					form.ShowDialog(this.Parent as Form);
-				}
-				finally
-				{
-					if (wasprotected == DialogResult.OK)
-					{
-						ProtectAuthenticator(item);
-					}
-				}
-			}
-			else if (menuitem.Name == "showTrionSecretMenuItem")
-			{
-				// check if the authenticator is still protected
-				DialogResult wasprotected = UnprotectAuthenticator(item);
-				if (wasprotected == DialogResult.Cancel)
-				{
-					return;
-				}
-				try
-				{
-					// show the secret key for Trion authenticator				
-					ShowTrionSecretForm form = new ShowTrionSecretForm();
 					form.CurrentAuthenticator = auth;
 					form.ShowDialog(this.Parent as Form);
 				}

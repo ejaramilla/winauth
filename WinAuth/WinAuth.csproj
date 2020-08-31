@@ -195,12 +195,6 @@
     <Compile Include="AddGoogleAuthenticator.designer.cs">
       <DependentUpon>AddGoogleAuthenticator.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddGuildWarsAuthenticator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AddGuildWarsAuthenticator.designer.cs">
-      <DependentUpon>AddGuildWarsAuthenticator.cs</DependentUpon>
-    </Compile>
     <Compile Include="AddMicrosoftAuthenticator.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -229,12 +223,6 @@
     </Compile>
     <Compile Include="ShowSteamTradesForm.designer.cs">
       <DependentUpon>ShowSteamTradesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AddTrionAuthenticator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AddTrionAuthenticator.designer.cs">
-      <DependentUpon>AddTrionAuthenticator.cs</DependentUpon>
     </Compile>
     <Compile Include="AuthenticatorListBox.cs" />
     <Compile Include="BetaForm.cs">
@@ -355,12 +343,6 @@
     <Compile Include="ShowSecretKeyForm.designer.cs">
       <DependentUpon>ShowSecretKeyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ShowTrionSecretForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ShowTrionSecretForm.designer.cs">
-      <DependentUpon>ShowTrionSecretForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="UpdateCheckForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -389,10 +371,6 @@
     <EmbeddedResource Include="AddGoogleAuthenticator.resx">
       <DependentUpon>AddGoogleAuthenticator.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AddGuildWarsAuthenticator.resx">
-      <DependentUpon>AddGuildWarsAuthenticator.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="AddMicrosoftAuthenticator.resx">
       <DependentUpon>AddMicrosoftAuthenticator.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -405,9 +383,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ShowSteamTradesForm.resx">
       <DependentUpon>ShowSteamTradesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AddTrionAuthenticator.resx">
-      <DependentUpon>AddTrionAuthenticator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="BetaForm.resx">
       <DependentUpon>BetaForm.cs</DependentUpon>
@@ -467,9 +442,6 @@
     <EmbeddedResource Include="ShowSecretKeyForm.resx">
       <DependentUpon>ShowSecretKeyForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ShowTrionSecretForm.resx">
-      <DependentUpon>ShowTrionSecretForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UpdateCheckForm.resx">
       <DependentUpon>UpdateCheckForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -497,13 +469,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\BattleNetAuthenticatorIcon.png" />
     <EmbeddedResource Include="Resources\GoogleAuthenticatorIcon.png" />
-    <EmbeddedResource Include="Resources\GuildWarsAuthenticatorIcon.png" />
     <EmbeddedResource Include="Resources\RefreshIcon.png" />
     <EmbeddedResource Include="Resources\MicrosoftAuthenticatorIcon.png" />
     <None Include="Resources\OptionsIcon.png" />
-    <EmbeddedResource Include="Resources\TrionAuthenticatorIcon.png" />
     <EmbeddedResource Include="Resources\RiftIcon.png" />
-    <None Include="Resources\trion.png" />
     <None Include="Resources\battlenet.png" />
     <EmbeddedResource Include="Resources\DiabloIcon.png" />
     <EmbeddedResource Include="Resources\DefianceIcon.png" />

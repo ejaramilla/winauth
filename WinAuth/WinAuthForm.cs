@@ -1625,24 +1625,6 @@ namespace WinAuth
 					form.Authenticator = winauthauthenticator;
 					added = (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK);
 				}
-				else if (registeredauth.AuthenticatorType == RegisteredAuthenticator.AuthenticatorTypes.Trion)
-				{
-					// create the Trion authenticator
-					int existing = 0;
-					string name;
-					do
-					{
-						name = "Trion" + (existing != 0 ? " (" + existing + ")" : string.Empty);
-						existing++;
-					} while (authenticatorList.Items.Cast<AuthenticatorListitem>().Where(a => a.Authenticator.Name == name).Count() != 0);
-
-					winauthauthenticator.Name = name;
-					winauthauthenticator.AutoRefresh = false;
-
-					AddTrionAuthenticator form = new AddTrionAuthenticator();
-					form.Authenticator = winauthauthenticator;
-					added = (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK);
-				}
 				else if (registeredauth.AuthenticatorType == RegisteredAuthenticator.AuthenticatorTypes.Steam)
 				{
 					// create the authenticator
@@ -1676,23 +1658,6 @@ namespace WinAuth
 					winauthauthenticator.AutoRefresh = false;
 
 					AddGoogleAuthenticator form = new AddGoogleAuthenticator();
-					form.Authenticator = winauthauthenticator;
-					added = (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK);
-				}
-				else if (registeredauth.AuthenticatorType == RegisteredAuthenticator.AuthenticatorTypes.GuildWars)
-				{
-					// create the GW2 authenticator
-					int existing = 0;
-					string name;
-					do
-					{
-						name = "GuildWars" + (existing != 0 ? " (" + existing + ")" : string.Empty);
-						existing++;
-					} while (authenticatorList.Items.Cast<AuthenticatorListitem>().Where(a => a.Authenticator.Name == name).Count() != 0);
-					winauthauthenticator.Name = name;
-					winauthauthenticator.AutoRefresh = false;
-
-					AddGuildWarsAuthenticator form = new AddGuildWarsAuthenticator();
 					form.Authenticator = winauthauthenticator;
 					added = (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK);
 				}

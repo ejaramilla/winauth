@@ -992,14 +992,6 @@ namespace WinAuth
               {
                 waold.Name = "Battle.net";
               }
-              else if (waold.AuthenticatorData is GuildWarsAuthenticator)
-              {
-                waold.Name = "GuildWars 2";
-              }
-              else if (waold.AuthenticatorData is GuildWarsAuthenticator)
-              {
-                waold.Name = "Authenticator";
-              }
               this.Add(waold);
               this.CurrentAuthenticator = waold;
               waold.AutoRefresh = defaultAutoRefresh;
