@@ -323,88 +323,6 @@ namespace WinAuth
 				InitializeForm();
 			}, TaskScheduler.FromCurrentSynchronizationContext());
 #endif
-#if NETFX_3
-			WinAuthConfig config;
-			try
-			{
-				// use previous config if we have one
-				config = WinAuthHelper.LoadConfig(this, configFile, password);
-				if (config == null)
-				{
-					System.Diagnostics.Process.GetCurrentProcess().Kill();
-					return;
-				}
-
-				// check for a v2 config file if this is a new config
-				if (config.Count == 0 && string.IsNullOrEmpty(config.Filename) == true)
-				{
-					_existingv2Config = WinAuthHelper.GetLastV2Config();
-				}
-
-				this.Config = config;
-				this.Config.OnConfigChanged += new ConfigChangedHandler(OnConfigChanged);
-
-				if (config.Upgraded == true)
-				{
-					SaveConfig(true);
-					// display warning
-					WinAuthForm.ErrorDialog(this, string.Format(strings.ConfigUpgraded, WinAuthConfig.CURRENTVERSION));
-				}
-
-				InitializeForm();
-			}
-			catch (Exception ex)
-			{
-				if (ex is WinAuthInvalidNewerConfigException)
-				{
-					MessageBox.Show(this, ex.Message, WinAuthMain.APPLICATION_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Error);
-					System.Diagnostics.Process.GetCurrentProcess().Kill();
-					return;
-				}
-				else if (ex is EncryptedSecretDataException)
-				{
-					loadingPanel.Visible = false;
-					passwordPanel.Visible = true;
-					yubiPanel.Visible = false;
-
-					this.passwordButton.Focus();
-					this.passwordField.Focus();
-
-					return;
-				}
-				else if (ex is BadYubiKeyException)
-				{
-					loadingPanel.Visible = false;
-					passwordPanel.Visible = false;
-					yubiPanel.Visible = true;
-					this.yubiLabel.Text = strings.YubikeyInsert;
-					return;
-				}
-				else if (ex is BadPasswordException)
-				{
-					loadingPanel.Visible = false;
-					yubiPanel.Visible = false;
-					passwordPanel.Visible = true;
-					this.passwordErrorLabel.Text = strings.InvalidPassword;
-					this.passwordErrorLabel.Tag = DateTime.Now.AddSeconds(3);
-					// oddity with MetroFrame controls in have to set focus away and back to field to make it stick
-					this.Invoke((MethodInvoker)delegate { this.passwordButton.Focus(); this.passwordField.Focus(); });
-					this.passwordTimer.Enabled = true;
-					return;
-				}
-				else // if (ex is Exception)
-				{
-					if (ErrorDialog(this, strings.UnknownError + ": " + ex.Message, ex, MessageBoxButtons.RetryCancel) == System.Windows.Forms.DialogResult.Cancel)
-					{
-						this.Close();
-						return;
-					}
-					loadConfig(password);
-					return;
-				}
-			};
-#endif
-
     }
 
     /// <summary>
@@ -993,17 +911,6 @@ namespace WinAuth
 					}
 				}
 			})).Start();
-#endif
-#if NETFX_3
-			foreach (var auth in this.Config)
-			{
-				if (auth.AuthenticatorData != null && auth.AuthenticatorData is SteamAuthenticator)
-				{
-					var client = ((SteamAuthenticator)auth.AuthenticatorData).GetClient();
-					client.ConfirmationEvent += SteamClient_ConfirmationEvent;
-					client.ConfirmationErrorEvent += SteamClient_ConfirmationErrorEvent;
-				}
-			}
 #endif
 		}
 

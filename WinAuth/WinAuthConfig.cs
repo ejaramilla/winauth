@@ -881,9 +881,7 @@ namespace WinAuth
                   string data = reader.ReadElementContentAsString();
 
 									hasher.ComputeHash(Authenticator.StringToByteArray(data));
-#if !NETFX_3
                   hasher.Dispose();
-#endif
 
                   // decrypt
 									data = Authenticator.DecryptSequence(data, this.PasswordType, password);

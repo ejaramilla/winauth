@@ -687,9 +687,6 @@ namespace WinAuth
 #if NETFX_4
 				using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), ImportedSDAEntry.PBKDF2_ITERATIONS))
 #endif
-#if NETFX_3
-				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), ImportedSDAEntry.PBKDF2_ITERATIONS);
-#endif
 				{
 					byte[] key = pbkdf2.GetBytes(ImportedSDAEntry.KEY_SIZE_BYTES);
 

@@ -350,9 +350,6 @@ namespace WinAuth
 #if NETFX_4
 		private async void tradeAccept_Click(object sender, EventArgs e)
 #endif
-#if NETFX_3
-		private void tradeAccept_Click(object sender, EventArgs e)
-#endif
 		{
 			var cursor = Cursor.Current;
 			try
@@ -364,9 +361,6 @@ namespace WinAuth
 				string tradeId = button.Tag as string;
 #if NETFX_4
 				await AcceptTrade(tradeId);
-#endif
-#if NETFX_3
-				AcceptTrade(tradeId);
 #endif
 			}
 			finally
@@ -383,9 +377,6 @@ namespace WinAuth
 #if NETFX_4
 		private async void tradeReject_Click(object sender, EventArgs e)
 #endif
-#if NETFX_3
-		private void tradeReject_Click(object sender, EventArgs e)
-#endif
 		{
 			var cursor = Cursor.Current;
 			try
@@ -397,9 +388,6 @@ namespace WinAuth
 				string tradeId = button.Tag as string;
 #if NETFX_4
 				await RejectTrade(tradeId);
-#endif
-#if NETFX_3
-				RejectTrade(tradeId);
 #endif
 			}
 			finally
@@ -516,64 +504,6 @@ namespace WinAuth
 			}
 		}
 #endif
-#if NETFX_3
-		/// <summary>
-		/// Click the button to confirm all confirmations
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void confirmAllButton_Click(object sender, EventArgs e)
-		{
-			if (WinAuthForm.ConfirmDialog(this, "This will CONFIRM all your current trade confirmations." + Environment.NewLine + Environment.NewLine +
-				"Are you sure you want to continue?",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-			{
-				return;
-			}
-
-			var cursor = Cursor.Current;
-			try
-			{
-				Cursor.Current = Cursors.WaitCursor;
-				Application.DoEvents();
-
-				cancelAllButton.Enabled = false;
-				closeButton.Enabled = false;
-
-				var rand = new Random();
-				var tradeIds = m_trades.Select(t => t.Id).Reverse().ToArray();
-				for (var i = tradeIds.Length - 1; i >= 0; i--)
-				{
-					DateTime start = DateTime.Now;
-
-					var result = AcceptTrade(tradeIds[i]);
-					if (result == false)
-					{
-						break;
-					}
-					if (i != 0)
-					{
-						var duration = (int)DateTime.Now.Subtract(start).TotalMilliseconds;
-						var delay = SteamClient.CONFIRMATION_EVENT_DELAY + rand.Next(SteamClient.CONFIRMATION_EVENT_DELAY / 2); // delay is 100%-150% of CONFIRMATION_EVENT_DELAY
-						if (delay > duration)
-						{
-							Thread.Sleep(delay - duration);
-						}
-					}
-				}
-
-			}
-			finally
-			{
-				cancelAllButton.Enabled = true;
-				closeButton.Enabled = true;
-
-				this.Authenticator.MarkChanged();
-
-				Cursor.Current = cursor;
-			}
-		}
-#endif
 
 #if NETFX_4
 		/// <summary>
@@ -644,65 +574,6 @@ namespace WinAuth
 
 				cancelAllButton.Text = (string)cancelAllButton.Tag;
 
-				confirmAllButton.Enabled = true;
-				closeButton.Enabled = true;
-
-				this.Authenticator.MarkChanged();
-
-				Cursor.Current = cursor;
-			}
-		}
-#endif
-#if NETFX_3
-		/// <summary>
-		/// Click the button to cancel all confirmations
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void cancelAllButton_Click(object sender, EventArgs e)
-		{
-			if (WinAuthForm.ConfirmDialog(this, "This will CANCEL all your current trade confirmations." + Environment.NewLine + Environment.NewLine +
-				"Are you sure you want to continue?",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-			{
-				return;
-			}
-
-			var cursor = Cursor.Current;
-			try
-			{
-				Cursor.Current = Cursors.WaitCursor;
-				Application.DoEvents();
-
-				cancelAllButton.Text = "Stop";
-				confirmAllButton.Enabled = false;
-				closeButton.Enabled = false;
-
-				var rand = new Random();
-				var tradeIds = m_trades.Select(t => t.Id).Reverse().ToArray();
-				for (var i=tradeIds.Length-1; i >= 0; i--)
-				{
-					DateTime start = DateTime.Now;
-
-					var result = RejectTrade(tradeIds[i]);
-					if (result == false)
-					{
-						break;
-					}
-					if (i != 0)
-					{
-						var duration = (int)DateTime.Now.Subtract(start).TotalMilliseconds;
-						var delay = SteamClient.CONFIRMATION_EVENT_DELAY + rand.Next(SteamClient.CONFIRMATION_EVENT_DELAY / 2); // delay is 100%-150% of CONFIRMATION_EVENT_DELAY
-						if (delay > duration)
-						{
-							Thread.Sleep(delay - duration);
-						}
-					}
-				}
-
-			}
-			finally
-			{
 				confirmAllButton.Enabled = true;
 				closeButton.Enabled = true;
 
@@ -1015,9 +886,6 @@ namespace WinAuth
 #if NETFX_4
 		private async Task<bool> AcceptTrade(string tradeId)
 #endif
-#if NETFX_3
-		private bool AcceptTrade(string tradeId)
-#endif
 		{
 			try
 			{
@@ -1032,9 +900,6 @@ namespace WinAuth
 				{
 					return this.AuthenticatorData.GetClient().ConfirmTrade(((SteamClient.Confirmation)t).Id, ((SteamClient.Confirmation)t).Key, true);
 				}, trade);
-#endif
-#if NETFX_3
-				var result = this.AuthenticatorData.GetClient().ConfirmTrade(trade.Id, trade.Key, true);
 #endif
 				if (result == false)
 				{
@@ -1072,9 +937,6 @@ namespace WinAuth
 #if NETFX_4
 		private async Task<bool> RejectTrade(string tradeId)
 #endif
-#if NETFX_3
-		private bool RejectTrade(string tradeId)
-#endif
 		{
 			try
 			{
@@ -1089,9 +951,6 @@ namespace WinAuth
 				{
 					return this.AuthenticatorData.GetClient().ConfirmTrade(((SteamClient.Confirmation)t).Id, ((SteamClient.Confirmation)t).Key, false);
 				}, trade);
-#endif
-#if NETFX_3
-				var result = this.AuthenticatorData.GetClient().ConfirmTrade(trade.Id, trade.Key, false);
 #endif
 				if (result == false)
 				{
