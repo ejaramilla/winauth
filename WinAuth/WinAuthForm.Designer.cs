@@ -43,10 +43,6 @@
 			this.notifyMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.passwordTimer = new System.Windows.Forms.Timer(this.components);
 			this.hotkeyTimer = new System.Windows.Forms.Timer(this.components);
-			this.yubiPanel = new MetroFramework.Controls.MetroPanel();
-			this.yubiRetryButton = new MetroFramework.Controls.MetroButton();
-			this.yubiLabel = new MetroFramework.Controls.MetroLabel();
-			this.yubiImage = new System.Windows.Forms.PictureBox();
 			this.passwordPanel = new MetroFramework.Controls.MetroPanel();
 			this.passwordButton = new MetroFramework.Controls.MetroButton();
 			this.passwordErrorLabel = new MetroFramework.Controls.MetroLabel();
@@ -62,8 +58,6 @@
 			this.loadingPanel = new MetroFramework.Controls.MetroPanel();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.authenticatorMenu.SuspendLayout();
-			this.yubiPanel.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.yubiImage)).BeginInit();
 			this.passwordPanel.SuspendLayout();
 			this.commandPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.metroStyleManager)).BeginInit();
@@ -124,50 +118,6 @@
 			// 
 			this.hotkeyTimer.Interval = 250;
 			this.hotkeyTimer.Tick += new System.EventHandler(this.hotkeyTimer_Tick);
-			// 
-			// yubiPanel
-			// 
-			this.yubiPanel.Controls.Add(this.yubiRetryButton);
-			this.yubiPanel.Controls.Add(this.yubiLabel);
-			this.yubiPanel.Controls.Add(this.yubiImage);
-			this.yubiPanel.HorizontalScrollbarBarColor = true;
-			this.yubiPanel.HorizontalScrollbarHighlightOnWheel = false;
-			this.yubiPanel.HorizontalScrollbarSize = 10;
-			this.yubiPanel.Location = new System.Drawing.Point(20, 60);
-			this.yubiPanel.Name = "yubiPanel";
-			this.yubiPanel.Size = new System.Drawing.Size(380, 100);
-			this.yubiPanel.TabIndex = 5;
-			this.yubiPanel.VerticalScrollbarBarColor = true;
-			this.yubiPanel.VerticalScrollbarHighlightOnWheel = false;
-			this.yubiPanel.VerticalScrollbarSize = 10;
-			// 
-			// yubiRetryButton
-			// 
-			this.yubiRetryButton.Location = new System.Drawing.Point(269, 49);
-			this.yubiRetryButton.Name = "yubiRetryButton";
-			this.yubiRetryButton.Size = new System.Drawing.Size(75, 23);
-			this.yubiRetryButton.TabIndex = 5;
-			this.yubiRetryButton.Text = "OK";
-			this.yubiRetryButton.UseSelectable = true;
-			this.yubiRetryButton.Click += new System.EventHandler(this.yubiRetryButton_Click);
-			// 
-			// yubiLabel
-			// 
-			this.yubiLabel.AutoSize = true;
-			this.yubiLabel.Location = new System.Drawing.Point(13, 6);
-			this.yubiLabel.Name = "yubiLabel";
-			this.yubiLabel.Size = new System.Drawing.Size(324, 19);
-			this.yubiLabel.TabIndex = 4;
-			this.yubiLabel.Text = "Please insert your YubiKey or press the flashing button";
-			// 
-			// yubiImage
-			// 
-			this.yubiImage.Image = ((System.Drawing.Image)(resources.GetObject("yubiImage.Image")));
-			this.yubiImage.Location = new System.Drawing.Point(12, 32);
-			this.yubiImage.Name = "yubiImage";
-			this.yubiImage.Size = new System.Drawing.Size(230, 60);
-			this.yubiImage.TabIndex = 2;
-			this.yubiImage.TabStop = false;
 			// 
 			// passwordPanel
 			// 
@@ -350,7 +300,6 @@
 			this.BorderStyle = MetroFramework.Forms.MetroFormBorderStyle.FixedSingle;
 			this.ClientSize = new System.Drawing.Size(420, 180);
 			this.Controls.Add(this.loadingPanel);
-			this.Controls.Add(this.yubiPanel);
 			this.Controls.Add(this.passwordPanel);
 			this.Controls.Add(this.introLabel);
 			this.Controls.Add(this.commandPanel);
@@ -372,9 +321,6 @@
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.WinAuthForm_MouseDown);
 			this.Resize += new System.EventHandler(this.WinAuthForm_Resize);
 			this.authenticatorMenu.ResumeLayout(false);
-			this.yubiPanel.ResumeLayout(false);
-			this.yubiPanel.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.yubiImage)).EndInit();
 			this.passwordPanel.ResumeLayout(false);
 			this.passwordPanel.PerformLayout();
 			this.commandPanel.ResumeLayout(false);
@@ -409,10 +355,6 @@
 		private System.Windows.Forms.ContextMenuStrip notifyMenu;
 		private MetroFramework.Controls.MetroLink newVersionLink;
 		private System.Windows.Forms.Timer hotkeyTimer;
-		private MetroFramework.Controls.MetroPanel yubiPanel;
-		private System.Windows.Forms.PictureBox yubiImage;
-		private MetroFramework.Controls.MetroButton yubiRetryButton;
-		private MetroFramework.Controls.MetroLabel yubiLabel;
 		private MetroFramework.Controls.MetroPanel loadingPanel;
 		private System.Windows.Forms.PictureBox pictureBox1;
 
