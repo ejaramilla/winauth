@@ -98,7 +98,6 @@
     <Reference Include="BouncyCastle.Crypto, Version=1.7.4137.9688, Culture=neutral, PublicKeyToken=a4292a325f69b123, processorArchitecture=MSIL">
       <HintPath>..\packages\BouncyCastle.1.7.0\lib\Net40-Client\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" Condition="$([System.Version]::Parse('$(TargetFrameworkVersion.Substring(1))').CompareTo($([System.Version]::Parse('4.0')))) &gt;= 0" />
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -107,9 +106,6 @@
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
-    </Reference>
-    <Reference Include="System.Data">
-      <Name>System.Data</Name>
     </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
