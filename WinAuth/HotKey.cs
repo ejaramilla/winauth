@@ -17,174 +17,161 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace WinAuth
 {
-	/// <summary>
-	/// A hot key sequence and command containing the key, modifier and script
-	/// </summary>
-	public class HotKey
-	{
-		public enum HotKeyActions
-		{
-			Inject,
-			Copy,
-			Notify,
-			Advanced
-		};
-
-		/// <summary>
-		/// Modifier for hotkey
-		/// </summary>
-		public WinAPI.KeyModifiers Modifiers;
-
-		/// <summary>
-		/// Hotkey code
-		/// </summary>
-		public WinAPI.VirtualKeyCode Key;
-
-		/// <summary>
-		/// Action to be perform on hotkey
-		/// </summary>
-		public HotKeyActions Action;
-
-		/// <summary>
-		/// Specific window title or process name
-		/// </summary>
-		public string Window;
-
-		/// <summary>
-		/// Copy of advanced script from authenticator data
-		/// </summary>
-		public string Advanced;
-
-		/// <summary>
-		/// Create a new HotKey
-		/// </summary>
-		public HotKey()
-		{
-			Action = HotKeyActions.Notify;
-		}
-
-		/// <summary>
-		/// Read the saved Xml to load the hotkey
-		/// </summary>
-		/// <param name="reader">XmlReader</param>
-    public void ReadXml(XmlReader reader)
+    /// <summary>
+    ///     A hot key sequence and command containing the key, modifier and script
+    /// </summary>
+    public class HotKey
     {
-      reader.MoveToContent();
-
-      if (reader.IsEmptyElement)
-      {
-        reader.Read();
-        return;
-      }
-
-      reader.Read();
-      while (reader.EOF == false)
-      {
-        if (reader.IsStartElement())
+        public enum HotKeyActions
         {
-          switch (reader.Name)
-          {
-            case "modifiers":
-      				Modifiers = (WinAPI.KeyModifiers)BitConverter.ToInt32(Authenticator.StringToByteArray(reader.ReadElementContentAsString()), 0);
-              break;
-
-            case "key":
-              Key = (WinAPI.VirtualKeyCode)BitConverter.ToUInt16(Authenticator.StringToByteArray(reader.ReadElementContentAsString()), 0);
-              break;
-
-						case "action":
-							Action = (HotKeyActions)Enum.Parse(typeof(HotKeyActions), reader.ReadElementContentAsString(), true);
-							break;
-
-						case "window":
-							Window = reader.ReadElementContentAsString();
-							break;
-
-						case "advanced":
-							Advanced = reader.ReadElementContentAsString();
-							break;
-
-						default:
-              reader.Skip();
-              break;
-          }
+            Inject,
+            Copy,
+            Notify,
+            Advanced
         }
-        else
+
+        /// <summary>
+        ///     Action to be perform on hotkey
+        /// </summary>
+        public HotKeyActions Action;
+
+        /// <summary>
+        ///     Copy of advanced script from authenticator data
+        /// </summary>
+        public string Advanced;
+
+        /// <summary>
+        ///     Hotkey code
+        /// </summary>
+        public WinAPI.VirtualKeyCode Key;
+
+        /// <summary>
+        ///     Modifier for hotkey
+        /// </summary>
+        public WinAPI.KeyModifiers Modifiers;
+
+        /// <summary>
+        ///     Specific window title or process name
+        /// </summary>
+        public string Window;
+
+        /// <summary>
+        ///     Create a new HotKey
+        /// </summary>
+        public HotKey()
         {
-          reader.Read();
-          break;
+            Action = HotKeyActions.Notify;
         }
-      }
+
+        /// <summary>
+        ///     Read the saved Xml to load the hotkey
+        /// </summary>
+        /// <param name="reader">XmlReader</param>
+        public void ReadXml(XmlReader reader)
+        {
+            reader.MoveToContent();
+
+            if (reader.IsEmptyElement)
+            {
+                reader.Read();
+                return;
+            }
+
+            reader.Read();
+            while (reader.EOF == false)
+                if (reader.IsStartElement())
+                {
+                    switch (reader.Name)
+                    {
+                        case "modifiers":
+                            Modifiers = (WinAPI.KeyModifiers) BitConverter.ToInt32(
+                                Authenticator.StringToByteArray(reader.ReadElementContentAsString()), 0);
+                            break;
+
+                        case "key":
+                            Key = (WinAPI.VirtualKeyCode) BitConverter.ToUInt16(
+                                Authenticator.StringToByteArray(reader.ReadElementContentAsString()), 0);
+                            break;
+
+                        case "action":
+                            Action = (HotKeyActions) Enum.Parse(typeof(HotKeyActions),
+                                reader.ReadElementContentAsString(), true);
+                            break;
+
+                        case "window":
+                            Window = reader.ReadElementContentAsString();
+                            break;
+
+                        case "advanced":
+                            Advanced = reader.ReadElementContentAsString();
+                            break;
+
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }
+                else
+                {
+                    reader.Read();
+                    break;
+                }
+        }
+
+        /// <summary>
+        ///     Write data into the XmlWriter
+        /// </summary>
+        /// <param name="writer">XmlWriter to write to</param>
+        public void WriteXmlString(XmlWriter writer)
+        {
+            writer.WriteStartElement("hotkey");
+
+            writer.WriteStartElement("modifiers");
+            writer.WriteString(Authenticator.ByteArrayToString(BitConverter.GetBytes((int) Modifiers)));
+            writer.WriteEndElement();
+            //
+            writer.WriteStartElement("key");
+            writer.WriteString(Authenticator.ByteArrayToString(BitConverter.GetBytes((ushort) Key)));
+            writer.WriteEndElement();
+            //
+            writer.WriteStartElement("action");
+            writer.WriteString(Enum.GetName(typeof(HotKeyActions), Action));
+            writer.WriteEndElement();
+            //
+            if (string.IsNullOrEmpty(Window) == false)
+            {
+                writer.WriteStartElement("window");
+                writer.WriteString(Window);
+                writer.WriteEndElement();
+            }
+
+            //
+            if (string.IsNullOrEmpty(Advanced) == false)
+            {
+                writer.WriteStartElement("advanced");
+                writer.WriteString(Advanced);
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        ///     Get the display string for this shortcut
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            var shortcut = Key.ToString().Substring(3);
+            if ((Modifiers & WinAPI.KeyModifiers.Alt) != 0) shortcut = "Alt-" + shortcut;
+            if ((Modifiers & WinAPI.KeyModifiers.Control) != 0) shortcut = "Ctrl-" + shortcut;
+            if ((Modifiers & WinAPI.KeyModifiers.Shift) != 0) shortcut = "Shift-" + shortcut;
+
+            return shortcut;
+        }
     }
-
-		/// <summary>
-		/// Write data into the XmlWriter
-		/// </summary>
-		/// <param name="writer">XmlWriter to write to</param>
-		public void WriteXmlString(XmlWriter writer)
-		{
-			writer.WriteStartElement("hotkey");
-
-			writer.WriteStartElement("modifiers");
-			writer.WriteString(Authenticator.ByteArrayToString(BitConverter.GetBytes((int)Modifiers)));
-			writer.WriteEndElement();
-			//
-			writer.WriteStartElement("key");
-			writer.WriteString(Authenticator.ByteArrayToString(BitConverter.GetBytes((ushort)Key)));
-			writer.WriteEndElement();
-			//
-			writer.WriteStartElement("action");
-			writer.WriteString(Enum.GetName(typeof(HotKeyActions), this.Action));
-			writer.WriteEndElement();
-			//
-			if (String.IsNullOrEmpty(this.Window) == false)
-			{
-				writer.WriteStartElement("window");
-				writer.WriteString(this.Window);
-				writer.WriteEndElement();
-			}
-			//
-			if (String.IsNullOrEmpty(this.Advanced) == false)
-			{
-				writer.WriteStartElement("advanced");
-				writer.WriteString(this.Advanced);
-				writer.WriteEndElement();
-			}
-
-			writer.WriteEndElement();
-		}
-
-		/// <summary>
-		/// Get the display string for this shortcut
-		/// </summary>
-		/// <returns></returns>
-		public override string ToString()
-		{
-			string shortcut = this.Key.ToString().Substring(3);
-			if ((this.Modifiers & WinAPI.KeyModifiers.Alt) != 0)
-			{
-				shortcut = "Alt-" + shortcut;
-			}
-			if ((this.Modifiers & WinAPI.KeyModifiers.Control) != 0)
-			{
-				shortcut = "Ctrl-" + shortcut;
-			}
-			if ((this.Modifiers & WinAPI.KeyModifiers.Shift) != 0)
-			{
-				shortcut = "Shift-" + shortcut;
-			}
-
-			return shortcut;
-		}
-	}
-
 }

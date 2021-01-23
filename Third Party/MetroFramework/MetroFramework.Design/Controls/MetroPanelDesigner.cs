@@ -21,22 +21,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 
+using System.ComponentModel;
+using System.Windows.Forms.Design;
 using MetroFramework.Controls;
 
 namespace MetroFramework.Design.Controls
 {
-    internal class MetroPanelDesigner : System.Windows.Forms.Design.ParentControlDesigner
+    internal class MetroPanelDesigner : ParentControlDesigner
     {
-        public override void Initialize(System.ComponentModel.IComponent component)
+        public override void Initialize(IComponent component)
         {
             base.Initialize(component);
 
-            if (this.Control is MetroPanel)
+            if (Control is MetroPanel)
             {
                 //this.EnableDesignMode(((MetroPanel)this.Control).ScrollablePanel, "ScrollablePanel");
             }

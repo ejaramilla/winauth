@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -36,21 +37,17 @@ namespace MetroFramework.Native
         [StructLayout(LayoutKind.Explicit)]
         public struct RECT
         {
-            [FieldOffset(12)]
-            public int bottom;
-            [FieldOffset(0)]
-            public int left;
-            [FieldOffset(8)]
-            public int right;
-            [FieldOffset(4)]
-            public int top;
+            [FieldOffset(12)] public int bottom;
+            [FieldOffset(0)] public int left;
+            [FieldOffset(8)] public int right;
+            [FieldOffset(4)] public int top;
 
             public RECT(Rectangle rect)
             {
-                this.left = rect.Left;
-                this.top = rect.Top;
-                this.right = rect.Right;
-                this.bottom = rect.Bottom;
+                left = rect.Left;
+                top = rect.Top;
+                right = rect.Right;
+                bottom = rect.Bottom;
             }
 
             public RECT(int left, int top, int right, int bottom)
@@ -63,15 +60,15 @@ namespace MetroFramework.Native
 
             public void Set()
             {
-                this.left = InlineAssignHelper(ref this.top, InlineAssignHelper(ref this.right, InlineAssignHelper(ref this.bottom, 0)));
+                left = InlineAssignHelper(ref top, InlineAssignHelper(ref right, InlineAssignHelper(ref bottom, 0)));
             }
 
             public void Set(Rectangle rect)
             {
-                this.left = rect.Left;
-                this.top = rect.Top;
-                this.right = rect.Right;
-                this.bottom = rect.Bottom;
+                left = rect.Left;
+                top = rect.Top;
+                right = rect.Right;
+                bottom = rect.Bottom;
             }
 
             public void Set(int left, int top, int right, int bottom)
@@ -84,23 +81,15 @@ namespace MetroFramework.Native
 
             public Rectangle ToRectangle()
             {
-                return new Rectangle(this.left, this.top, this.right - this.left, this.bottom - this.top);
+                return new Rectangle(left, top, right - left, bottom - top);
             }
 
-            public int Height
-            {
-                get { return (this.bottom - this.top); }
-            }
+            public int Height => bottom - top;
 
-            public Size Size
-            {
-                get { return new Size(this.Width, this.Height); }
-            }
+            public Size Size => new Size(Width, Height);
 
-            public int Width
-            {
-                get { return (this.right - this.left); }
-            }
+            public int Width => right - left;
+
             private static T InlineAssignHelper<T>(ref T target, T value)
             {
                 target = value;
@@ -192,12 +181,13 @@ namespace MetroFramework.Native
             public int cxRightWidth;
             public int cyTopHeight;
             public int cyBottomHeight;
+
             public MARGINS(int Left, int Right, int Top, int Bottom)
             {
-                this.cxLeftWidth = Left;
-                this.cxRightWidth = Right;
-                this.cyTopHeight = Top;
-                this.cyBottomHeight = Bottom;
+                cxLeftWidth = Left;
+                cxRightWidth = Right;
+                cyTopHeight = Top;
+                cyBottomHeight = Bottom;
             }
         }
 
@@ -265,7 +255,7 @@ namespace MetroFramework.Native
         public const int DWM_TNP_RECTSOURCE = 2;
         public const int DWM_TNP_SOURCECLIENTAREAONLY = 0x10;
         public const int DWM_TNP_VISIBLE = 8;
-        public static readonly bool DwmApiAvailable = (Environment.OSVersion.Version.Major >= 6);
+        public static readonly bool DwmApiAvailable = Environment.OSVersion.Version.Major >= 6;
 
         public const int WM_DWMCOMPOSITIONCHANGED = 0x31e;
 
@@ -274,43 +264,64 @@ namespace MetroFramework.Native
         #region API Calls
 
         [DllImport("dwmapi.dll")]
-        public static extern int DwmDefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref IntPtr result);
+        public static extern int DwmDefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam,
+            ref IntPtr result);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmEnableComposition(int fEnable);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmEnableMMCSS(int fEnableMMCSS);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmExtendFrameIntoClientArea(IntPtr hdc, ref MARGINS marInset);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmGetColorizationColor(ref int pcrColorization, ref int pfOpaqueBlend);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmGetCompositionTimingInfo(IntPtr hwnd, ref DWM_TIMING_INFO pTimingInfo);
+
         [DllImport("dwmapi.dll")]
-        public static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, IntPtr pvAttribute, int cbAttribute);
+        public static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, IntPtr pvAttribute,
+            int cbAttribute);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmModifyPreviousDxFrameDuration(IntPtr hwnd, int cRefreshes, int fRelative);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmQueryThumbnailSourceSize(IntPtr hThumbnail, ref Size pSize);
+
         [DllImport("dwmapi.dll")]
-        public static extern int DwmRegisterThumbnail(IntPtr hwndDestination, IntPtr hwndSource, ref Size pMinimizedSize, ref IntPtr phThumbnailId);
+        public static extern int DwmRegisterThumbnail(IntPtr hwndDestination, IntPtr hwndSource,
+            ref Size pMinimizedSize, ref IntPtr phThumbnailId);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetDxFrameDuration(IntPtr hwnd, int cRefreshes);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetPresentParameters(IntPtr hwnd, ref DWM_PRESENT_PARAMETERS pPresentParams);
+
         [DllImport("dwmapi.dll")]
-        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, IntPtr pvAttribute, int cbAttribute);
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, IntPtr pvAttribute,
+            int cbAttribute);
+
         [DllImport("dwmapi.dll")]
         public static extern int DwmUnregisterThumbnail(IntPtr hThumbnailId);
+
         [DllImport("dwmapi.dll")]
-        public static extern int DwmUpdateThumbnailProperties(IntPtr hThumbnailId, ref DWM_THUMBNAIL_PROPERTIES ptnProperties);
+        public static extern int DwmUpdateThumbnailProperties(IntPtr hThumbnailId,
+            ref DWM_THUMBNAIL_PROPERTIES ptnProperties);
 
         [DllImport("dwmapi.dll")]
         public static extern int DwmEnableBlurBehindWindow(IntPtr hWnd, ref DWM_BLURBEHIND pBlurBehind);
 
         [DllImport("uxtheme.dll")]
-        public static extern int SetWindowThemeAttribute(IntPtr hWnd, WindowThemeAttributeType wtype, ref WTA_OPTIONS attributes, uint size);
+        public static extern int SetWindowThemeAttribute(IntPtr hWnd, WindowThemeAttributeType wtype,
+            ref WTA_OPTIONS attributes, uint size);
 
         #endregion
     }

@@ -21,20 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Windows.Forms;
 
-using MetroFramework.Drawing;
+using System;
 using MetroFramework.Components;
+using MetroFramework.Drawing;
 
 namespace MetroFramework.Interfaces
 {
     public interface IMetroControl
     {
-        event EventHandler<MetroPaintEventArgs> CustomPaintBackground;
-        event EventHandler<MetroPaintEventArgs> CustomPaint;
-        event EventHandler<MetroPaintEventArgs> CustomPaintForeground;
-
         MetroColorStyle Style { get; set; }
         MetroThemeStyle Theme { get; set; }
 
@@ -44,5 +39,8 @@ namespace MetroFramework.Interfaces
         bool UseCustomForeColor { get; set; }
         bool UseStyleColors { get; set; }
         bool UseSelectable { get; set; }
+        event EventHandler<MetroPaintEventArgs> CustomPaintBackground;
+        event EventHandler<MetroPaintEventArgs> CustomPaint;
+        event EventHandler<MetroPaintEventArgs> CustomPaintForeground;
     }
 }

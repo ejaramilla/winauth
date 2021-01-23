@@ -17,74 +17,66 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 
 namespace WinAuth
 {
-	/// <summary>
-	/// Class instance that creates a global mutex so we can ensure only one copy of application
-	/// runs at a time.
-	/// 
-	/// http://stackoverflow.com/questions/229565/what-is-a-good-pattern-for-using-a-global-mutex-in-c/229567
-	/// 
-	/// </summary>
-	public class SingleGlobalInstance : IDisposable
-	{
-		public bool HasHandle { get; set; }
+    /// <summary>
+    ///     Class instance that creates a global mutex so we can ensure only one copy of application
+    ///     runs at a time.
+    ///     http://stackoverflow.com/questions/229565/what-is-a-good-pattern-for-using-a-global-mutex-in-c/229567
+    /// </summary>
+    public class SingleGlobalInstance : IDisposable
+    {
+        private Mutex _mutex;
 
-		private Mutex _mutex;
+        public SingleGlobalInstance(int timeOut = Timeout.Infinite)
+        {
+            InitMutex();
+            try
+            {
+                HasHandle = _mutex.WaitOne(timeOut, false);
+                if (HasHandle == false)
+                    throw new TimeoutException("Timeout waiting for exclusive access on SingleInstance");
+            }
+            catch (AbandonedMutexException)
+            {
+                HasHandle = true;
+            }
+        }
 
-		private void InitMutex()
-		{
-			HasHandle = false;
+        public bool HasHandle { get; set; }
 
-			string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value.ToString();
-			string userGuid = WindowsIdentity.GetCurrent().User.Value;
-			string mutexId = string.Format("Global\\{{{0}}}-{{{1}}}", userGuid, appGuid);
-			_mutex = new Mutex(false, mutexId);
-
-			var allowEveryoneRule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), MutexRights.FullControl, AccessControlType.Allow);
-			var securitySettings = new MutexSecurity();
-			securitySettings.AddAccessRule(allowEveryoneRule);
-			_mutex.SetAccessControl(securitySettings);
-		}
-
-		public SingleGlobalInstance(int timeOut = Timeout.Infinite)
-		{
-			InitMutex();
-			try
-			{
-				HasHandle = _mutex.WaitOne(timeOut, false);
-				if (HasHandle == false)
-				{
-					throw new TimeoutException("Timeout waiting for exclusive access on SingleInstance");
-				}
-			}
-			catch (AbandonedMutexException)
-			{
-				HasHandle = true;
-			}
-		}
-
-		public void Dispose()
-		{
-			if (_mutex != null)
-			{
-				if (HasHandle)
-				{
-					_mutex.ReleaseMutex();
-				}
+        public void Dispose()
+        {
+            if (_mutex != null)
+            {
+                if (HasHandle) _mutex.ReleaseMutex();
 #if NETFX_4
-				_mutex.Dispose();
+                _mutex.Dispose();
 #endif
-			}
-		}
-	}
+            }
+        }
+
+        private void InitMutex()
+        {
+            HasHandle = false;
+
+            var appGuid = ((GuidAttribute) Assembly.GetExecutingAssembly()
+                .GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value;
+            var userGuid = WindowsIdentity.GetCurrent().User.Value;
+            var mutexId = string.Format("Global\\{{{0}}}-{{{1}}}", userGuid, appGuid);
+            _mutex = new Mutex(false, mutexId);
+
+            var allowEveryoneRule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null),
+                MutexRights.FullControl, AccessControlType.Allow);
+            var securitySettings = new MutexSecurity();
+            securitySettings.AddAccessRule(allowEveryoneRule);
+            _mutex.SetAccessControl(securitySettings);
+        }
+    }
 }

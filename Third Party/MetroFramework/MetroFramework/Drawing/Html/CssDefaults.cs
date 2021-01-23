@@ -24,19 +24,18 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
+
+using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
     public class CssDefaults
     {
         /// <summary>
-        /// CSS Specification's Default Style Sheet for HTML 4
+        ///     CSS Specification's Default Style Sheet for HTML 4
         /// </summary>
         /// <remarks>
-        /// http://www.w3.org/TR/CSS21/sample.html
+        ///     http://www.w3.org/TR/CSS21/sample.html
         /// </remarks>
         public const string DefaultStyleSheet = @"
 
@@ -143,7 +142,7 @@ namespace MetroFramework.Drawing.Html
         ";
 
         /// <summary>
-        /// Html Fragment used to draw the icon that shows an error on an IMG HTML element
+        ///     Html Fragment used to draw the icon that shows an error on an IMG HTML element
         /// </summary>
         public const string ErrorOnImageIcon = @"
         <style>
@@ -168,7 +167,7 @@ namespace MetroFramework.Drawing.Html
         </table>";
 
         /// <summary>
-        /// Html Fragment used to draw the icon that shows an error on an OBJECT HTML element
+        ///     Html Fragment used to draw the icon that shows an error on an OBJECT HTML element
         /// </summary>
         public const string ErrorOnObjectIcon = @"
         <style>
@@ -193,33 +192,33 @@ namespace MetroFramework.Drawing.Html
         </table>";
 
         /// <summary>
-        /// Default font size in points. Change this value to modify the default font size.
+        ///     Default font size in points. Change this value to modify the default font size.
         /// </summary>
         public static float FontSize = 12f;
 
         /// <summary>
-        /// Default font used for the generic 'serif' family
+        ///     Default font used for the generic 'serif' family
         /// </summary>
-        public static string FontSerif = System.Drawing.FontFamily.GenericSerif.Name;
+        public static string FontSerif = FontFamily.GenericSerif.Name;
 
         /// <summary>
-        /// Default font used for the generic 'sans-serif' family
+        ///     Default font used for the generic 'sans-serif' family
         /// </summary>
-        public static string FontSansSerif = System.Drawing.FontFamily.GenericSansSerif.Name;
+        public static string FontSansSerif = FontFamily.GenericSansSerif.Name;
 
         /// <summary>
-        /// Default font used for the generic 'cursive' family
+        ///     Default font used for the generic 'cursive' family
         /// </summary>
         public static string FontCursive = "Monotype Corsiva";
 
         /// <summary>
-        /// Default font used for the generic 'fantasy' family
+        ///     Default font used for the generic 'fantasy' family
         /// </summary>
         public static string FontFantasy = "Comic Sans MS";
 
         /// <summary>
-        /// Default font used for the generic 'monospace' family
+        ///     Default font used for the generic 'monospace' family
         /// </summary>
-        public static string FontMonospace = System.Drawing.FontFamily.GenericMonospace.Name;
+        public static string FontMonospace = FontFamily.GenericMonospace.Name;
     }
 }

@@ -24,28 +24,27 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Globalization;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Represents and gets info about a CSS Length
+    ///     Represents and gets info about a CSS Length
     /// </summary>
     /// <remarks>
-    /// http://www.w3.org/TR/CSS21/syndata.html#length-units
+    ///     http://www.w3.org/TR/CSS21/syndata.html#length-units
     /// </remarks>
     public class CssLength
     {
         #region Enum
 
         /// <summary>
-        /// Represents the possible units of the CSS lengths
+        ///     Represents the possible units of the CSS lengths
         /// </summary>
         /// <remarks>
-        /// http://www.w3.org/TR/CSS21/syndata.html#length-units
+        ///     http://www.w3.org/TR/CSS21/syndata.html#length-units
         /// </remarks>
         public enum CssUnit
         {
@@ -70,28 +69,18 @@ namespace MetroFramework.Drawing.Html
 
         #endregion
 
-        #region Fields
-        private float _number;
-        private bool _isRelative;
-        private CssUnit _unit;
-        private string _length;
-        private bool _isPercentage;
-        private bool _hasError;
-
-        #endregion
-
         #region Ctor
 
         /// <summary>
-        /// Creates a new CssLength from a length specified on a CSS style sheet or fragment
+        ///     Creates a new CssLength from a length specified on a CSS style sheet or fragment
         /// </summary>
         /// <param name="length">Length as specified in the Style Sheet or style fragment</param>
         public CssLength(string length)
         {
-            _length = length;
+            Length = length;
             _number = 0f;
-            _unit = CssUnit.None;
-            _isPercentage = false;
+            Unit = CssUnit.None;
+            IsPercentage = false;
 
             //Return zero if no length specified, zero specified
             if (string.IsNullOrEmpty(length) || length == "0") return;
@@ -100,7 +89,7 @@ namespace MetroFramework.Drawing.Html
             if (length.EndsWith("%"))
             {
                 _number = CssValue.ParseNumber(length, 1);
-                _isPercentage = true;
+                IsPercentage = true;
                 return;
             }
 
@@ -108,119 +97,103 @@ namespace MetroFramework.Drawing.Html
             if (length.Length < 3)
             {
                 float.TryParse(length, out _number);
-                _hasError = true;
+                HasError = true;
                 return;
             }
 
             //Get units of the length
-            string u = length.Substring(length.Length - 2, 2);
+            var u = length.Substring(length.Length - 2, 2);
 
             //Number of the length
-            string number = length.Substring(0, length.Length - 2);
+            var number = length.Substring(0, length.Length - 2);
 
             //TODO: Units behave different in paper and in screen!
             switch (u)
             {
                 case CssConstants.Em:
-                    _unit = CssUnit.Ems;
-                    _isRelative = true;
+                    Unit = CssUnit.Ems;
+                    IsRelative = true;
                     break;
                 case CssConstants.Ex:
-                    _unit = CssUnit.Ex;
-                    _isRelative = true;
+                    Unit = CssUnit.Ex;
+                    IsRelative = true;
                     break;
                 case CssConstants.Px:
-                    _unit = CssUnit.Pixels;
-                    _isRelative = true;
+                    Unit = CssUnit.Pixels;
+                    IsRelative = true;
                     break;
                 case CssConstants.Mm:
-                    _unit = CssUnit.Milimeters;
+                    Unit = CssUnit.Milimeters;
                     break;
                 case CssConstants.Cm:
-                    _unit = CssUnit.Centimeters;
+                    Unit = CssUnit.Centimeters;
                     break;
                 case CssConstants.In:
-                    _unit = CssUnit.Inches;
+                    Unit = CssUnit.Inches;
                     break;
                 case CssConstants.Pt:
-                    _unit = CssUnit.Points;
+                    Unit = CssUnit.Points;
                     break;
                 case CssConstants.Pc:
-                    _unit = CssUnit.Picas;
+                    Unit = CssUnit.Picas;
                     break;
                 default:
-                    _hasError = true;
+                    HasError = true;
                     return;
             }
 
-            if (!float.TryParse(number,  System.Globalization.NumberStyles.Number, NumberFormatInfo.InvariantInfo, out _number))
-            {
-                _hasError = true;
-            }
-
+            if (!float.TryParse(number, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out _number))
+                HasError = true;
         }
+
+        #endregion
+
+        #region Fields
+
+        private readonly float _number;
 
         #endregion
 
         #region Props
 
         /// <summary>
-        /// Gets the number in the length
+        ///     Gets the number in the length
         /// </summary>
-        public float Number
-        {
-            get { return _number; }
-        }
+        public float Number => _number;
 
         /// <summary>
-        /// Gets if the length has some parsing error
+        ///     Gets if the length has some parsing error
         /// </summary>
-        public bool HasError
-        {
-            get { return _hasError; }
-        }
+        public bool HasError { get; }
 
 
         /// <summary>
-        /// Gets if the length represents a precentage (not actually a length)
+        ///     Gets if the length represents a precentage (not actually a length)
         /// </summary>
-        public bool IsPercentage
-        {
-            get { return _isPercentage; }
-        }
-	
+        public bool IsPercentage { get; }
+
 
         /// <summary>
-        /// Gets if the length is specified in relative units
+        ///     Gets if the length is specified in relative units
         /// </summary>
-        public bool IsRelative
-        {
-            get { return _isRelative; }
-        }
+        public bool IsRelative { get; }
 
         /// <summary>
-        /// Gets the unit of the length
+        ///     Gets the unit of the length
         /// </summary>
-        public CssUnit Unit
-        {
-            get { return _unit; }
-        }
+        public CssUnit Unit { get; }
 
         /// <summary>
-        /// Gets the length as specified in the string
+        ///     Gets the length as specified in the string
         /// </summary>
-        public string Length
-        {
-            get { return _length; }
-        }
-
+        public string Length { get; }
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// If length is in Ems, returns its value in points
+        ///     If length is in Ems, returns its value in points
         /// </summary>
         /// <param name="emSize">Em size factor to multiply</param>
         /// <returns>Points size of this em</returns>
@@ -230,11 +203,12 @@ namespace MetroFramework.Drawing.Html
             if (HasError) throw new InvalidOperationException("Invalid length");
             if (Unit != CssUnit.Ems) throw new InvalidOperationException("Length is not in ems");
 
-            return new CssLength(string.Format("{0}pt", Convert.ToSingle(Number * emSize).ToString("0.0", NumberFormatInfo.InvariantInfo)));
+            return new CssLength(string.Format("{0}pt",
+                Convert.ToSingle(Number * emSize).ToString("0.0", NumberFormatInfo.InvariantInfo)));
         }
 
         /// <summary>
-        /// If length is in Ems, returns its value in pixels
+        ///     If length is in Ems, returns its value in pixels
         /// </summary>
         /// <param name="emSize">Pixel size factor to multiply</param>
         /// <returns>Pixels size of this em</returns>
@@ -244,59 +218,56 @@ namespace MetroFramework.Drawing.Html
             if (HasError) throw new InvalidOperationException("Invalid length");
             if (Unit != CssUnit.Ems) throw new InvalidOperationException("Length is not in ems");
 
-            return new CssLength(string.Format("{0}px", Convert.ToSingle(Number * pixelFactor).ToString("0.0", NumberFormatInfo.InvariantInfo)));
+            return new CssLength(string.Format("{0}px",
+                Convert.ToSingle(Number * pixelFactor).ToString("0.0", NumberFormatInfo.InvariantInfo)));
         }
 
         /// <summary>
-        /// Returns the length formatted ready for CSS interpreting.
+        ///     Returns the length formatted ready for CSS interpreting.
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            if (HasError)
-            {
-                return string.Empty;
-            }
-            else if (IsPercentage)
+            if (HasError) return string.Empty;
+
+            if (IsPercentage)
             {
                 return string.Format(NumberFormatInfo.InvariantInfo, "{0}%", Number);
             }
-            else
+
+            var u = string.Empty;
+
+            switch (Unit)
             {
-                string u = string.Empty;
-
-                switch (Unit)
-                {
-                    case CssUnit.None:
-                        break;
-                    case CssUnit.Ems:
-                        u = "em";
-                        break;
-                    case CssUnit.Pixels:
-                        u = "px";
-                        break;
-                    case CssUnit.Ex:
-                        u = "ex";
-                        break;
-                    case CssUnit.Inches:
-                        u = "in";
-                        break;
-                    case CssUnit.Centimeters:
-                        u = "cm";
-                        break;
-                    case CssUnit.Milimeters:
-                        u = "mm";
-                        break;
-                    case CssUnit.Points:
-                        u = "pt";
-                        break;
-                    case CssUnit.Picas:
-                        u = "pc";
-                        break;
-                }
-
-                return string.Format(NumberFormatInfo.InvariantInfo, "{0}{1}", Number, u);
+                case CssUnit.None:
+                    break;
+                case CssUnit.Ems:
+                    u = "em";
+                    break;
+                case CssUnit.Pixels:
+                    u = "px";
+                    break;
+                case CssUnit.Ex:
+                    u = "ex";
+                    break;
+                case CssUnit.Inches:
+                    u = "in";
+                    break;
+                case CssUnit.Centimeters:
+                    u = "cm";
+                    break;
+                case CssUnit.Milimeters:
+                    u = "mm";
+                    break;
+                case CssUnit.Points:
+                    u = "pt";
+                    break;
+                case CssUnit.Picas:
+                    u = "pc";
+                    break;
             }
+
+            return string.Format(NumberFormatInfo.InvariantInfo, "{0}{1}", Number, u);
         }
 
         #endregion

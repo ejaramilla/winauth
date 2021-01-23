@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -30,6 +31,13 @@ namespace MetroFramework.Native
     [SuppressUnmanagedCodeSecurity]
     internal sealed class WinCaret
     {
+        private readonly IntPtr controlHandle;
+
+        public WinCaret(IntPtr ownerHandle)
+        {
+            controlHandle = ownerHandle;
+        }
+
         [DllImport("User32.dll")]
         private static extern bool CreateCaret(IntPtr hWnd, int hBitmap, int nWidth, int nHeight);
 
@@ -45,29 +53,26 @@ namespace MetroFramework.Native
         [DllImport("User32.dll")]
         public static extern bool HideCaret(IntPtr hWnd);
 
-        private IntPtr controlHandle;
-
-        public WinCaret(IntPtr ownerHandle)
-        {
-            controlHandle = ownerHandle;
-        }
-
         public bool Create(int width, int height)
         {
             return CreateCaret(controlHandle, 0, width, height);
         }
+
         public void Hide()
         {
             HideCaret(controlHandle);
         }
+
         public void Show()
         {
             ShowCaret(controlHandle);
         }
+
         public bool SetPosition(int x, int y)
         {
             return SetCaretPos(x, y);
         }
+
         public void Destroy()
         {
             DestroyCaret();

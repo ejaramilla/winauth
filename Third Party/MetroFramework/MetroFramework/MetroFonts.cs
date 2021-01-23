@@ -21,13 +21,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Reflection;
-using System.Drawing.Text;
-using System;
 
 namespace MetroFramework
 {
@@ -159,48 +156,11 @@ namespace MetroFramework
 
     public static class MetroFonts
     {
+        public static Font Title => DefaultLight(24f);
 
-        #region Font Resolver
+        public static Font Subtitle => Default(14f);
 
-        internal interface IMetroFontResolver
-        {
-            Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit);
-        }
-
-        private class DefaultFontResolver : IMetroFontResolver
-        {
-            public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit)
-            {
-                return new Font(familyName, emSize, fontStyle, unit);
-            }
-        }
-
-        private static IMetroFontResolver FontResolver;
-
-        static MetroFonts()
-        {
-            try
-            {
-                Type t = Type.GetType(AssemblyRef.MetroFrameworkFontResolver);
-                if (t != null)
-                {
-                    FontResolver = (IMetroFontResolver)Activator.CreateInstance(t);
-                    if (FontResolver != null)
-                    {
-                        Debug.WriteLine("'" + AssemblyRef.MetroFrameworkFontResolver + "' loaded.", "MetroFonts");
-                        return;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // ignore
-                Debug.WriteLine(ex.Message, "MetroFonts");
-            }
-            FontResolver = new DefaultFontResolver();
-        }
-
-        #endregion
+        public static Font TileCount => Default(44f);
 
         public static Font DefaultLight(float size)
         {
@@ -215,16 +175,6 @@ namespace MetroFramework
         public static Font DefaultBold(float size)
         {
             return FontResolver.ResolveFont("Segoe UI", size, FontStyle.Bold, GraphicsUnit.Pixel);
-        }
-
-        public static Font Title
-        {
-            get { return DefaultLight(24f); }
-        }
-
-        public static Font Subtitle
-        {
-            get { return Default(14f); }
         }
 
         public static Font Tile(MetroTileTextSize labelSize, MetroTileTextWeight labelWeight)
@@ -258,11 +208,6 @@ namespace MetroFramework
             }
 
             return DefaultLight(14f);
-        }
-
-        public static Font TileCount
-        {
-            get { return Default(44f); }
         }
 
         public static Font Link(MetroLinkSize linkSize, MetroLinkWeight linkWeight)
@@ -528,5 +473,48 @@ namespace MetroFramework
 
             return Default(11f);
         }
+
+        #region Font Resolver
+
+        internal interface IMetroFontResolver
+        {
+            Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit);
+        }
+
+        private class DefaultFontResolver : IMetroFontResolver
+        {
+            public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit)
+            {
+                return new Font(familyName, emSize, fontStyle, unit);
+            }
+        }
+
+        private static readonly IMetroFontResolver FontResolver;
+
+        static MetroFonts()
+        {
+            try
+            {
+                var t = Type.GetType(AssemblyRef.MetroFrameworkFontResolver);
+                if (t != null)
+                {
+                    FontResolver = (IMetroFontResolver) Activator.CreateInstance(t);
+                    if (FontResolver != null)
+                    {
+                        Debug.WriteLine("'" + AssemblyRef.MetroFrameworkFontResolver + "' loaded.", "MetroFonts");
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // ignore
+                Debug.WriteLine(ex.Message, "MetroFonts");
+            }
+
+            FontResolver = new DefaultFontResolver();
+        }
+
+        #endregion
     }
 }

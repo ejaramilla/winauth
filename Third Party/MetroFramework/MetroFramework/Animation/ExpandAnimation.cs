@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -31,25 +32,22 @@ namespace MetroFramework.Animation
         public void Start(Control control, Size targetSize, TransitionType transitionType, int duration)
         {
             base.Start(control, transitionType, duration,
-                delegate 
+                delegate
                 {
-                    int width = DoExpandAnimation(control.Width, targetSize.Width);
-                    int height = DoExpandAnimation(control.Height, targetSize.Height);
+                    var width = DoExpandAnimation(control.Width, targetSize.Width);
+                    var height = DoExpandAnimation(control.Height, targetSize.Height);
 
                     control.Size = new Size(width, height);
-                }, 
-                delegate 
-                {
-                    return (control.Size.Equals(targetSize));
-                });
+                },
+                delegate { return control.Size.Equals(targetSize); });
         }
 
         private int DoExpandAnimation(int startSize, int targetSize)
         {
-            float t = (float)counter - startTime;
-            float b = (float)startSize;
-            float c = (float)targetSize - startSize;
-            float d = (float)targetTime - startTime;
+            var t = (float) counter - startTime;
+            float b = startSize;
+            var c = (float) targetSize - startSize;
+            var d = (float) targetTime - startTime;
 
             return MakeTransition(t, b, d, c);
         }

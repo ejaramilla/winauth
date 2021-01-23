@@ -21,11 +21,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Forms;
-
 using MetroFramework.Interfaces;
 
 namespace MetroFramework.Components
@@ -38,59 +37,47 @@ namespace MetroFramework.Components
         private readonly IContainer parentContainer;
 
         private MetroColorStyle metroStyle = MetroDefaults.Style;
+
         [DefaultValue(MetroDefaults.Style)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public MetroColorStyle Style
         {
-            get { return metroStyle; }
+            get => metroStyle;
             set
             {
-                if (value == MetroColorStyle.Default)
-                {
-                    value = MetroDefaults.Style;
-                }
+                if (value == MetroColorStyle.Default) value = MetroDefaults.Style;
 
                 metroStyle = value;
 
-                if (!isInitializing)
-                {
-                    Update();
-                }
+                if (!isInitializing) Update();
             }
         }
 
         private MetroThemeStyle metroTheme = MetroDefaults.Theme;
+
         [DefaultValue(MetroDefaults.Theme)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public MetroThemeStyle Theme
         {
-            get { return metroTheme; }
+            get => metroTheme;
             set
             {
-                if (value == MetroThemeStyle.Default)
-                {
-                    value = MetroDefaults.Theme;
-                }
+                if (value == MetroThemeStyle.Default) value = MetroDefaults.Theme;
 
                 metroTheme = value;
 
-                if (!isInitializing)
-                {
-                    Update();
-                }
+                if (!isInitializing) Update();
             }
         }
 
         private ContainerControl owner;
+
         public ContainerControl Owner
         {
-            get { return owner; }
+            get => owner;
             set
             {
-                if (owner != null)
-                {
-                    owner.ControlAdded -= ControlAdded;
-                }
+                if (owner != null) owner.ControlAdded -= ControlAdded;
 
                 owner = value;
 
@@ -98,10 +85,7 @@ namespace MetroFramework.Components
                 {
                     owner.ControlAdded += ControlAdded;
 
-                    if (!isInitializing)
-                    {
-                        UpdateControl(value);
-                    }
+                    if (!isInitializing) UpdateControl(value);
                 }
             }
         }
@@ -112,7 +96,6 @@ namespace MetroFramework.Components
 
         public MetroStyleManager()
         {
-        
         }
 
         public MetroStyleManager(IContainer parentContainer)
@@ -131,7 +114,7 @@ namespace MetroFramework.Components
 
         public object Clone()
         {
-            MetroStyleManager newStyleManager = new MetroStyleManager();
+            var newStyleManager = new MetroStyleManager();
             newStyleManager.metroTheme = Theme;
             newStyleManager.metroStyle = Style;
             return newStyleManager;
@@ -139,12 +122,9 @@ namespace MetroFramework.Components
 
         public object Clone(ContainerControl owner)
         {
-            MetroStyleManager clonedManager = Clone() as MetroStyleManager;
+            var clonedManager = Clone() as MetroStyleManager;
 
-            if (owner is IMetroForm)
-            {
-                clonedManager.Owner = owner;
-            }
+            if (owner is IMetroForm) clonedManager.Owner = owner;
 
             return clonedManager;
         }
@@ -172,73 +152,40 @@ namespace MetroFramework.Components
 
         private void ControlAdded(object sender, ControlEventArgs e)
         {
-            if (!isInitializing)
-            {
-                UpdateControl(e.Control);
-            }
+            if (!isInitializing) UpdateControl(e.Control);
         }
 
         public void Update()
         {
-            if (owner != null)
-            {
-                UpdateControl(owner);
-            }
+            if (owner != null) UpdateControl(owner);
 
-            if (parentContainer == null || parentContainer.Components == null)
-            {
-                return;
-            }
+            if (parentContainer == null || parentContainer.Components == null) return;
 
-            foreach (Object obj in parentContainer.Components)
-            {
+            foreach (var obj in parentContainer.Components)
                 if (obj is IMetroComponent)
-                {
-                    ApplyTheme((IMetroComponent)obj);
-                }
-            }
+                    ApplyTheme((IMetroComponent) obj);
         }
 
         private void UpdateControl(Control ctrl)
         {
-            if (ctrl == null)
-            {
-                return;
-            }
+            if (ctrl == null) return;
 
-            IMetroControl metroControl = ctrl as IMetroControl;
-            if (metroControl != null)
-            {
-                ApplyTheme(metroControl);
-            }
+            var metroControl = ctrl as IMetroControl;
+            if (metroControl != null) ApplyTheme(metroControl);
 
-            IMetroComponent metroComponent = ctrl as IMetroComponent;
-            if (metroComponent != null)
-            {
-                ApplyTheme(metroComponent);
-            }
+            var metroComponent = ctrl as IMetroComponent;
+            if (metroComponent != null) ApplyTheme(metroComponent);
 
-            TabControl tabControl = ctrl as TabControl;
+            var tabControl = ctrl as TabControl;
             if (tabControl != null)
-            {
-                foreach (TabPage tp in ((TabControl)ctrl).TabPages)
-                {
+                foreach (TabPage tp in ((TabControl) ctrl).TabPages)
                     UpdateControl(tp);
-                }
-            }
 
             if (ctrl.Controls != null)
-            {
                 foreach (Control child in ctrl.Controls)
-                {
                     UpdateControl(child);
-                }
-            }
 
-            if (ctrl.ContextMenuStrip != null)
-            {
-                UpdateControl(ctrl.ContextMenuStrip);
-            }
+            if (ctrl.ContextMenuStrip != null) UpdateControl(ctrl.ContextMenuStrip);
 
             ctrl.Refresh();
         }

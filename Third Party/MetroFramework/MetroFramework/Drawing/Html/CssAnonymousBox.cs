@@ -24,18 +24,17 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Represents an anonymous inline box
+    ///     Represents an anonymous inline box
     /// </summary>
     /// <remarks>
-    /// To learn more about anonymous inline boxes visit:
-    /// http://www.w3.org/TR/CSS21/visuren.html#anonymous
+    ///     To learn more about anonymous inline boxes visit:
+    ///     http://www.w3.org/TR/CSS21/visuren.html#anonymous
     /// </remarks>
     [CLSCompliant(false)]
     public class CssAnonymousBox
@@ -46,14 +45,13 @@ namespace MetroFramework.Drawing.Html
         public CssAnonymousBox(CssBox parentBox)
             : base(parentBox)
         {
-
         }
 
         #endregion
     }
 
     /// <summary>
-    /// Represents an anonymous inline box which contains nothing but blank spaces
+    ///     Represents an anonymous inline box which contains nothing but blank spaces
     /// </summary>
     [CLSCompliant(false)]
     public class CssAnonymousSpaceBox
@@ -62,8 +60,6 @@ namespace MetroFramework.Drawing.Html
         public CssAnonymousSpaceBox(CssBox parentBox)
             : base(parentBox)
         {
-
         }
     }
-
 }

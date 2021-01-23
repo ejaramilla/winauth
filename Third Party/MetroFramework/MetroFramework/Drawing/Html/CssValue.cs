@@ -24,15 +24,14 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Drawing.Drawing2D;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Diagnostics;
-using System.Globalization;
-using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
@@ -40,39 +39,30 @@ namespace MetroFramework.Drawing.Html
     public static class CssValue
     {
         /// <summary>
-        /// Evals a number and returns it. If number is a percentage, it will be multiplied by <see cref="hundredPercent"/>
+        ///     Evals a number and returns it. If number is a percentage, it will be multiplied by <see cref="hundredPercent" />
         /// </summary>
         /// <param name="number">Number to be parsed</param>
         /// <param name="factor">Number that represents the 100% if parsed number is a percentage</param>
         /// <returns>Parsed number. Zero if error while parsing.</returns>
         public static float ParseNumber(string number, float hundredPercent)
         {
-            if (string.IsNullOrEmpty(number))
-            {
-                return 0f;
-            }
+            if (string.IsNullOrEmpty(number)) return 0f;
 
-            string toParse = number;
-            bool isPercent = number.EndsWith("%");
-            float result = 0f;
+            var toParse = number;
+            var isPercent = number.EndsWith("%");
+            var result = 0f;
 
             if (isPercent) toParse = number.Substring(0, number.Length - 1);
 
-            if (!float.TryParse(toParse, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out result))
-            {
-                return 0f;
-            }
+            if (!float.TryParse(toParse, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out result)) return 0f;
 
-            if (isPercent)
-            {
-                result = (result / 100f) * hundredPercent;
-            }
+            if (isPercent) result = result / 100f * hundredPercent;
 
             return result;
         }
 
         /// <summary>
-        /// Parses a length. Lengths are followed by an unit identifier (e.g. 10px, 3.1em)
+        ///     Parses a length. Lengths are followed by an unit identifier (e.g. 10px, 3.1em)
         /// </summary>
         /// <param name="length">Specified length</param>
         /// <param name="hundredPercent">Equivalent to 100 percent when length is percentage</param>
@@ -84,7 +74,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Parses a length. Lengths are followed by an unit identifier (e.g. 10px, 3.1em)
+        ///     Parses a length. Lengths are followed by an unit identifier (e.g. 10px, 3.1em)
         /// </summary>
         /// <param name="length">Specified length</param>
         /// <param name="hundredPercent">Equivalent to 100 percent when length is percentage</param>
@@ -92,7 +82,8 @@ namespace MetroFramework.Drawing.Html
         /// <param name="useParentsEm"></param>
         /// <param name="returnPoints">Allows the return float to be in points. If false, result will be pixels</param>
         /// <returns></returns>
-        public static float ParseLength(string length, float hundredPercent, CssBox box, float emFactor, bool returnPoints)
+        public static float ParseLength(string length, float hundredPercent, CssBox box, float emFactor,
+            bool returnPoints)
         {
             //Return zero if no length specified, zero specified
             if (string.IsNullOrEmpty(length) || length == "0") return 0f;
@@ -104,13 +95,13 @@ namespace MetroFramework.Drawing.Html
             if (length.Length < 3) return 0f;
 
             //Get units of the length
-            string unit = length.Substring(length.Length - 2, 2);
+            var unit = length.Substring(length.Length - 2, 2);
 
             //Factor will depend on the unit
-            float factor = 1f;
+            var factor = 1f;
 
             //Number of the length
-            string number = length.Substring(0, length.Length - 2);
+            var number = length.Substring(0, length.Length - 2);
 
             //TODO: Units behave different in paper and in screen!
             switch (unit)
@@ -133,10 +124,7 @@ namespace MetroFramework.Drawing.Html
                 case CssConstants.Pt:
                     factor = 96f / 72f; // 1 point = 1/72 of inch
 
-                    if (returnPoints)
-                    {
-                        return ParseNumber(number, hundredPercent);
-                    }
+                    if (returnPoints) return ParseNumber(number, hundredPercent);
 
                     break;
                 case CssConstants.Pc:
@@ -147,22 +135,21 @@ namespace MetroFramework.Drawing.Html
                     break;
             }
 
-            
 
             return factor * ParseNumber(number, hundredPercent);
         }
 
         /// <summary>
-        /// Parses a color value in CSS style; e.g. #ff0000, red, rgb(255,0,0), rgb(100%, 0, 0)
+        ///     Parses a color value in CSS style; e.g. #ff0000, red, rgb(255,0,0), rgb(100%, 0, 0)
         /// </summary>
         /// <param name="colorValue">Specified color value; e.g. #ff0000, red, rgb(255,0,0), rgb(100%, 0, 0)</param>
         /// <returns>System.Drawing.Color value</returns>
         public static Color GetActualColor(string colorValue)
         {
-            int r = 0;
-            int g = 0;
-            int b = 0;
-            Color onError = Color.Empty;
+            var r = 0;
+            var g = 0;
+            var b = 0;
+            var onError = Color.Empty;
 
             if (string.IsNullOrEmpty(colorValue)) return onError;
 
@@ -171,46 +158,44 @@ namespace MetroFramework.Drawing.Html
             if (colorValue.StartsWith("#"))
             {
                 #region hexadecimal forms
-                string hex = colorValue.Substring(1);
+
+                var hex = colorValue.Substring(1);
 
                 if (hex.Length == 6)
                 {
-                    r = int.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
-                    g = int.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
-                    b = int.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+                    r = int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
+                    g = int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
+                    b = int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
                 }
                 else if (hex.Length == 3)
                 {
-                    r = int.Parse(new String(hex.Substring(0, 1)[0], 2), System.Globalization.NumberStyles.HexNumber);
-                    g = int.Parse(new String(hex.Substring(1, 1)[0], 2), System.Globalization.NumberStyles.HexNumber);
-                    b = int.Parse(new String(hex.Substring(2, 1)[0], 2), System.Globalization.NumberStyles.HexNumber);
+                    r = int.Parse(new string(hex.Substring(0, 1)[0], 2), NumberStyles.HexNumber);
+                    g = int.Parse(new string(hex.Substring(1, 1)[0], 2), NumberStyles.HexNumber);
+                    b = int.Parse(new string(hex.Substring(2, 1)[0], 2), NumberStyles.HexNumber);
                 }
                 else
                 {
                     return onError;
-                } 
+                }
+
                 #endregion
             }
             else if (colorValue.StartsWith("rgb(") && colorValue.EndsWith(")"))
             {
                 #region RGB forms
 
-                string rgb = colorValue.Substring(4, colorValue.Length - 5);
-                string[] chunks = rgb.Split(',');
+                var rgb = colorValue.Substring(4, colorValue.Length - 5);
+                var chunks = rgb.Split(',');
 
                 if (chunks.Length == 3)
-                {
                     unchecked
                     {
                         r = Convert.ToInt32(ParseNumber(chunks[0].Trim(), 255f));
                         g = Convert.ToInt32(ParseNumber(chunks[1].Trim(), 255f));
-                        b = Convert.ToInt32(ParseNumber(chunks[2].Trim(), 255f)); 
+                        b = Convert.ToInt32(ParseNumber(chunks[2].Trim(), 255f));
                     }
-                }
                 else
-                {
                     return onError;
-                }
 
                 #endregion
             }
@@ -218,57 +203,69 @@ namespace MetroFramework.Drawing.Html
             {
                 #region Color Constants
 
-                string hex = string.Empty;
+                var hex = string.Empty;
 
                 switch (colorValue)
                 {
                     case CssConstants.Maroon:
-                        hex = "#800000"; break;
+                        hex = "#800000";
+                        break;
                     case CssConstants.Red:
-                        hex = "#ff0000"; break;
+                        hex = "#ff0000";
+                        break;
                     case CssConstants.Orange:
-                        hex = "#ffA500"; break;
+                        hex = "#ffA500";
+                        break;
                     case CssConstants.Olive:
-                        hex = "#808000"; break;
+                        hex = "#808000";
+                        break;
                     case CssConstants.Purple:
-                        hex = "#800080"; break;
+                        hex = "#800080";
+                        break;
                     case CssConstants.Fuchsia:
-                        hex = "#ff00ff"; break;
+                        hex = "#ff00ff";
+                        break;
                     case CssConstants.White:
-                        hex = "#ffffff"; break;
+                        hex = "#ffffff";
+                        break;
                     case CssConstants.Lime:
-                        hex = "#00ff00"; break;
+                        hex = "#00ff00";
+                        break;
                     case CssConstants.Green:
-                        hex = "#008000"; break;
+                        hex = "#008000";
+                        break;
                     case CssConstants.Navy:
-                        hex = "#000080"; break;
+                        hex = "#000080";
+                        break;
                     case CssConstants.Blue:
-                        hex = "#0000ff"; break;
+                        hex = "#0000ff";
+                        break;
                     case CssConstants.Aqua:
-                        hex = "#00ffff"; break;
+                        hex = "#00ffff";
+                        break;
                     case CssConstants.Teal:
-                        hex = "#008080"; break;
+                        hex = "#008080";
+                        break;
                     case CssConstants.Black:
-                        hex = "#000000"; break;
+                        hex = "#000000";
+                        break;
                     case CssConstants.Silver:
-                        hex = "#c0c0c0"; break;
+                        hex = "#c0c0c0";
+                        break;
                     case CssConstants.Gray:
-                        hex = "#808080"; break;
+                        hex = "#808080";
+                        break;
                     case CssConstants.Yellow:
-                        hex = "#FFFF00"; break;
+                        hex = "#FFFF00";
+                        break;
                 }
 
-                if (string.IsNullOrEmpty(hex))
-                {
-                    return onError;
-                }
-                else
-                {
-                    Color c = GetActualColor(hex);
-                    r = c.R;
-                    g = c.G;
-                    b = c.B;
-                }
+                if (string.IsNullOrEmpty(hex)) return onError;
+
+                var c = GetActualColor(hex);
+                r = c.R;
+                g = c.G;
+                b = c.B;
 
                 #endregion
             }
@@ -277,16 +274,13 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Parses a border value in CSS style; e.g. 1px, 1, thin, thick, medium
+        ///     Parses a border value in CSS style; e.g. 1px, 1, thin, thick, medium
         /// </summary>
         /// <param name="borderValue"></param>
         /// <returns></returns>
         public static float GetActualBorderWidth(string borderValue, CssBox b)
         {
-            if (string.IsNullOrEmpty(borderValue))
-            {
-                return GetActualBorderWidth(CssConstants.Medium, b);
-            }
+            if (string.IsNullOrEmpty(borderValue)) return GetActualBorderWidth(CssConstants.Medium, b);
 
             switch (borderValue)
             {
@@ -301,8 +295,8 @@ namespace MetroFramework.Drawing.Html
             }
         }
 
-         /// <summary>
-        /// Split the value by spaces; e.g. Useful in values like 'padding:5 4 3 inherit'
+        /// <summary>
+        ///     Split the value by spaces; e.g. Useful in values like 'padding:5 4 3 inherit'
         /// </summary>
         /// <param name="value">Value to be splitted</param>
         /// <returns>Splitted and trimmed values</returns>
@@ -312,7 +306,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Split the value by the specified separator; e.g. Useful in values like 'padding:5 4 3 inherit'
+        ///     Split the value by the specified separator; e.g. Useful in values like 'padding:5 4 3 inherit'
         /// </summary>
         /// <param name="value">Value to be splitted</param>
         /// <returns>Splitted and trimmed values</returns>
@@ -323,42 +317,39 @@ namespace MetroFramework.Drawing.Html
 
             if (string.IsNullOrEmpty(value)) return new string[] { };
 
-            string[] values = value.Split(separator);
-            List<string> result = new List<string>();
+            var values = value.Split(separator);
+            var result = new List<string>();
 
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
-                string val = values[i].Trim();
+                var val = values[i].Trim();
 
-                if (!string.IsNullOrEmpty(val))
-                {
-                    result.Add(val);
-                }
+                if (!string.IsNullOrEmpty(val)) result.Add(val);
             }
 
             return result.ToArray();
         }
 
         /// <summary>
-        /// Detects the type name in a path. 
-        /// E.g. Gets System.Drawing.Graphics from a path like System.Drawing.Graphics.Clear
+        ///     Detects the type name in a path.
+        ///     E.g. Gets System.Drawing.Graphics from a path like System.Drawing.Graphics.Clear
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         private static Type GetTypeInfo(string path, ref string moreInfo)
         {
-            int lastDot = path.LastIndexOf('.');
+            var lastDot = path.LastIndexOf('.');
 
             if (lastDot < 0) return null;
 
-            string type = path.Substring(0, lastDot);
+            var type = path.Substring(0, lastDot);
             moreInfo = path.Substring(lastDot + 1);
             moreInfo = moreInfo.Replace("(", string.Empty).Replace(")", string.Empty);
 
 
-            foreach (Assembly a in HtmlRenderer.References)
+            foreach (var a in HtmlRenderer.References)
             {
-                Type t = a.GetType(type, false, true);
+                var t = a.GetType(type, false, true);
 
                 if (t != null) return t;
             }
@@ -367,7 +358,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Returns the object specific to the path
+        ///     Returns the object specific to the path
         /// </summary>
         /// <param name="path"></param>
         /// <returns>One of the following possible objects: FileInfo, MethodInfo, PropertyInfo</returns>
@@ -375,47 +366,43 @@ namespace MetroFramework.Drawing.Html
         {
             if (path.StartsWith("method:", StringComparison.CurrentCultureIgnoreCase))
             {
-                string methodName = string.Empty;
-                Type t = GetTypeInfo(path.Substring(7), ref methodName); if (t == null) return null;
-                MethodInfo method = t.GetMethod(methodName);
+                var methodName = string.Empty;
+                var t = GetTypeInfo(path.Substring(7), ref methodName);
+                if (t == null) return null;
+                var method = t.GetMethod(methodName);
 
-                if (!method.IsStatic || method.GetParameters().Length > 0)
-                {
-                    return null;
-                }
+                if (!method.IsStatic || method.GetParameters().Length > 0) return null;
 
                 return method;
             }
-            else if (path.StartsWith("property:", StringComparison.CurrentCultureIgnoreCase))
+
+            if (path.StartsWith("property:", StringComparison.CurrentCultureIgnoreCase))
             {
-                string propName = string.Empty;
-                Type t = GetTypeInfo(path.Substring(9), ref propName); if (t == null) return null;
-                PropertyInfo prop = t.GetProperty(propName);
+                var propName = string.Empty;
+                var t = GetTypeInfo(path.Substring(9), ref propName);
+                if (t == null) return null;
+                var prop = t.GetProperty(propName);
 
                 return prop;
             }
-            else if (Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute))
-            {
+
+            if (Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute))
                 return new Uri(path);
-            }
-            else
-            {
-                return new FileInfo(path);
-            }
+            return new FileInfo(path);
         }
 
         /// <summary>
-        /// Gets the image of the specified path
+        ///     Gets the image of the specified path
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         public static Image GetImage(string path)
         {
-            object source = DetectSource(path);
+            var source = DetectSource(path);
 
-            FileInfo finfo = source as FileInfo;
-            PropertyInfo prop = source as PropertyInfo;
-            MethodInfo method = source as MethodInfo;
+            var finfo = source as FileInfo;
+            var prop = source as PropertyInfo;
+            var method = source as MethodInfo;
 
             try
             {
@@ -424,24 +411,24 @@ namespace MetroFramework.Drawing.Html
                     if (!finfo.Exists) return null;
 
                     return Image.FromFile(finfo.FullName);
-
                 }
-                else if (prop != null)
+
+                if (prop != null)
                 {
-                    if (!prop.PropertyType.IsSubclassOf(typeof(Image)) && !prop.PropertyType.Equals(typeof(Image))) return null;
-                    
+                    if (!prop.PropertyType.IsSubclassOf(typeof(Image)) && !prop.PropertyType.Equals(typeof(Image)))
+                        return null;
+
                     return prop.GetValue(null, null) as Image;
                 }
-                else if (method != null)
+
+                if (method != null)
                 {
                     if (!method.ReturnType.IsSubclassOf(typeof(Image))) return null;
 
                     return method.Invoke(null, null) as Image;
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
             catch
             {
@@ -450,17 +437,17 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the content of the stylesheet specified in the path
+        ///     Gets the content of the stylesheet specified in the path
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         public static string GetStyleSheet(string path)
         {
-            object source = DetectSource(path);
+            var source = DetectSource(path);
 
-            FileInfo finfo = source as FileInfo;
-            PropertyInfo prop = source as PropertyInfo;
-            MethodInfo method = source as MethodInfo;
+            var finfo = source as FileInfo;
+            var prop = source as PropertyInfo;
+            var method = source as MethodInfo;
 
             try
             {
@@ -468,28 +455,28 @@ namespace MetroFramework.Drawing.Html
                 {
                     if (!finfo.Exists) return null;
 
-                    StreamReader sr = new StreamReader(finfo.FullName);
-                    string result = sr.ReadToEnd();
+                    var sr = new StreamReader(finfo.FullName);
+                    var result = sr.ReadToEnd();
                     sr.Dispose();
 
                     return result;
                 }
-                else if (prop != null)
+
+                if (prop != null)
                 {
                     if (!prop.PropertyType.Equals(typeof(string))) return null;
 
                     return prop.GetValue(null, null) as string;
                 }
-                else if (method != null)
+
+                if (method != null)
                 {
                     if (!method.ReturnType.Equals(typeof(string))) return null;
 
                     return method.Invoke(null, null) as string;
                 }
-                else
-                {
-                    return string.Empty;
-                }
+
+                return string.Empty;
             }
             catch
             {
@@ -498,40 +485,28 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Executes the desired action when the user clicks a link
+        ///     Executes the desired action when the user clicks a link
         /// </summary>
         /// <param name="href"></param>
         public static void GoLink(string href)
         {
-            object source = DetectSource(href);
+            var source = DetectSource(href);
 
-            FileInfo finfo = source as FileInfo;
-            PropertyInfo prop = source as PropertyInfo;
-            MethodInfo method = source as MethodInfo;
-            Uri uri = source as Uri;
+            var finfo = source as FileInfo;
+            var prop = source as PropertyInfo;
+            var method = source as MethodInfo;
+            var uri = source as Uri;
 
-            try
+            if (finfo != null || uri != null)
             {
-                if (finfo != null || uri != null)
-                {
-                    ProcessStartInfo nfo = new ProcessStartInfo(href);
-                    nfo.UseShellExecute = true;
+                var nfo = new ProcessStartInfo(href);
+                nfo.UseShellExecute = true;
 
-                    Process.Start(nfo);
-
-                }
-                else if (method != null)
-                {
-                    method.Invoke(null, null);
-                }
-                else
-                {
-                    //Nothing to do.
-                }
+                Process.Start(nfo);
             }
-            catch
+            else if (method != null)
             {
-                throw;
+                method.Invoke(null, null);
             }
         }
     }

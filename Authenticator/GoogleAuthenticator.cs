@@ -17,23 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Serialization;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
 
 #if NUNIT
 using NUnit.Framework;
@@ -45,123 +29,102 @@ using OpenNETCF.Security.Cryptography;
 
 namespace WinAuth
 {
-  /// <summary>
-  /// Class that implements Google's authenticator
-  /// </summary>
-  public class GoogleAuthenticator : Authenticator
-  {
     /// <summary>
-    /// Number of digits in code
+    ///     Class that implements Google's authenticator
     /// </summary>
-    private const int CODE_DIGITS = 6;
-
-		/// <summary>
-		/// Number of minutes to ignore syncing if network error
-		/// </summary>
-		private const int SYNC_ERROR_MINUTES = 5;
-
-    /// <summary>
-    /// URL used to sync time
-    /// </summary>
-    private const string TIME_SYNC_URL = "http://www.google.com";
-
-		/// <summary>
-		/// Time of last Sync error
-		/// </summary>
-		private static DateTime _lastSyncError = DateTime.MinValue;
-
-    #region Authenticator data
-
-    public string Serial
+    public class GoogleAuthenticator : Authenticator
     {
-      get
-      {
-        return Base32.getInstance().Encode(SecretKey);
-      }
+        /// <summary>
+        ///     Number of digits in code
+        /// </summary>
+        private const int CODE_DIGITS = 6;
+
+        /// <summary>
+        ///     Number of minutes to ignore syncing if network error
+        /// </summary>
+        private const int SYNC_ERROR_MINUTES = 5;
+
+        /// <summary>
+        ///     URL used to sync time
+        /// </summary>
+        private const string TIME_SYNC_URL = "http://www.google.com";
+
+        /// <summary>
+        ///     Time of last Sync error
+        /// </summary>
+        private static DateTime _lastSyncError = DateTime.MinValue;
+
+        #region Authenticator data
+
+        public string Serial => Base32.getInstance().Encode(SecretKey);
+
+        #endregion
+
+        /// <summary>
+        ///     Enroll the authenticator with the server.
+        public void Enroll(string b32key)
+        {
+            SecretKey = Base32.getInstance().Decode(b32key);
+            Sync();
+        }
+
+        /// <summary>
+        ///     Synchronise this authenticator's time with Google. We update our data record with the difference from our UTC time.
+        /// </summary>
+        public override void Sync()
+        {
+            // check if data is protected
+            if (SecretKey == null && EncryptedData != null) throw new EncryptedSecretDataException();
+
+            // don't retry for 5 minutes
+            if (_lastSyncError >= DateTime.Now.AddMinutes(0 - SYNC_ERROR_MINUTES)) return;
+
+            try
+            {
+                // we use the Header response field from a request to www.google.come
+                var request = (HttpWebRequest) WebRequest.Create(TIME_SYNC_URL);
+                request.Method = "GET";
+                request.ContentType = "text/html";
+                request.Timeout = 5000;
+                // get response
+                using (var response = (HttpWebResponse) request.GetResponse())
+                {
+                    // OK?
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        throw new ApplicationException(string.Format("{0}: {1}", (int) response.StatusCode,
+                            response.StatusDescription));
+
+                    var headerdate = response.Headers["Date"];
+                    if (string.IsNullOrEmpty(headerdate) == false)
+                    {
+                        DateTime dt;
+                        if (DateTime.TryParse(headerdate, out dt))
+                        {
+                            // get as ms since epoch
+                            var dtms = Convert.ToInt64((dt.ToUniversalTime() - new DateTime(1970, 1, 1))
+                                .TotalMilliseconds);
+
+                            // get the difference between the server time and our current time
+                            var serverTimeDiff = dtms - CurrentTime;
+
+                            // update the Data object
+                            ServerTimeDiff = serverTimeDiff;
+                            LastServerTime = DateTime.Now.Ticks;
+                        }
+                    }
+
+                    // clear any sync error
+                    _lastSyncError = DateTime.MinValue;
+                }
+            }
+            catch (WebException)
+            {
+                // don't retry for a while after error
+                _lastSyncError = DateTime.Now;
+
+                // set to zero to force reset
+                ServerTimeDiff = 0;
+            }
+        }
     }
-
-    #endregion
-
-    /// <summary>
-    /// Create a new Authenticator object
-    /// </summary>
-    public GoogleAuthenticator()
-      : base(CODE_DIGITS)
-    {
-    }
-
-    /// <summary>
-    /// Enroll the authenticator with the server.
-    public void Enroll(string b32key)
-    {
-      SecretKey = Base32.getInstance().Decode(b32key);
-      Sync();
-    }
-
-    /// <summary>
-    /// Synchronise this authenticator's time with Google. We update our data record with the difference from our UTC time.
-    /// </summary>
-		public override void Sync()
-    {
-			// check if data is protected
-			if (this.SecretKey == null && this.EncryptedData != null)
-			{
-				throw new EncryptedSecretDataException();
-			}
-
-			// don't retry for 5 minutes
-			if (_lastSyncError >= DateTime.Now.AddMinutes(0 - SYNC_ERROR_MINUTES))
-			{
-				return;
-			}
-
-			try
-			{
-				// we use the Header response field from a request to www.google.come
-				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(TIME_SYNC_URL);
-				request.Method = "GET";
-				request.ContentType = "text/html";
-				request.Timeout = 5000;
-				// get response
-				using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-				{
-					// OK?
-					if (response.StatusCode != HttpStatusCode.OK)
-					{
-						throw new ApplicationException(string.Format("{0}: {1}", (int)response.StatusCode, response.StatusDescription));
-					}
-
-					string headerdate = response.Headers["Date"];
-					if (string.IsNullOrEmpty(headerdate) == false)
-					{
-						DateTime dt;
-						if (DateTime.TryParse(headerdate, out dt) == true)
-						{
-							// get as ms since epoch
-							long dtms = Convert.ToInt64((dt.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalMilliseconds);
-
-							// get the difference between the server time and our current time
-							long serverTimeDiff = dtms - CurrentTime;
-
-							// update the Data object
-							ServerTimeDiff = serverTimeDiff;
-							LastServerTime = DateTime.Now.Ticks;
-						}
-					}
-
-					// clear any sync error
-					_lastSyncError = DateTime.MinValue;
-				}
-			}
-			catch (WebException )
-			{
-				// don't retry for a while after error
-				_lastSyncError = DateTime.Now;
-
-				// set to zero to force reset
-				ServerTimeDiff = 0;
-			}
-    }
-
-  }
 }

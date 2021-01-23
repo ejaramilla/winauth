@@ -16,30 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;	
 
 namespace WinAuth
 {
-	public class RegisteredAuthenticator
-	{
-		public enum AuthenticatorTypes
-		{
-			None = 0,
-			BattleNet,
-			Google,
-			Microsoft,
-			RFC6238_TIME,
-			RFC6238_COUNTER,
-			Steam,
-			OktaVerify
-		}
+    public class RegisteredAuthenticator
+    {
+        public enum AuthenticatorTypes
+        {
+            None = 0,
+            BattleNet,
+            Google,
+            Microsoft,
+            RFC6238_TIME,
+            RFC6238_COUNTER,
+            Steam,
+            OktaVerify
+        }
 
-		public string Name;
-		public AuthenticatorTypes AuthenticatorType;
-		public string Icon;
-		public List<RegisteredAuthenticator> Children = new List<RegisteredAuthenticator>();
-	}
+        public AuthenticatorTypes AuthenticatorType;
+        public List<RegisteredAuthenticator> Children = new List<RegisteredAuthenticator>();
+        public string Icon;
+
+        public string Name;
+    }
 }

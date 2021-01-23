@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -42,6 +41,7 @@ using System.Runtime.InteropServices;
 internal static class MetroFrameworkDesignAssembly
 {
     internal const string Title = "MetroFramework.Design.dll";
+
     // JT: Use same information as main MetroFramework.dll
     internal const string Version = MetroFrameworkAssembly.Version;
     internal const string Description = MetroFrameworkAssembly.Description;

@@ -31,9 +31,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
-
 using MetroFramework.Controls;
 using MetroFramework.Native;
 
@@ -41,6 +42,17 @@ namespace MetroFramework.Design.Controls
 {
     internal class MetroTabControlDesigner : ParentControlDesigner
     {
+        #region Constructor
+
+        public MetroTabControlDesigner()
+        {
+            var verb1 = new DesignerVerb("Add Tab", OnAddPage);
+            var verb2 = new DesignerVerb("Remove Tab", OnRemovePage);
+            designerVerbs.AddRange(new[] {verb1, verb2});
+        }
+
+        #endregion
+
         #region Fields
 
         private readonly DesignerVerbCollection designerVerbs = new DesignerVerbCollection();
@@ -49,91 +61,65 @@ namespace MetroFramework.Design.Controls
 
         private ISelectionService selectionService;
 
-        public override SelectionRules SelectionRules
-        {
-            get
-            {
-                return Control.Dock == DockStyle.Fill ? SelectionRules.Visible : base.SelectionRules;
-            }
-        }
+        public override SelectionRules SelectionRules =>
+            Control.Dock == DockStyle.Fill ? SelectionRules.Visible : base.SelectionRules;
+
         public override DesignerVerbCollection Verbs
         {
             get
             {
                 if (designerVerbs.Count == 2)
                 {
-                    var myControl = (MetroTabControl)Control;
+                    var myControl = (MetroTabControl) Control;
                     designerVerbs[1].Enabled = myControl.TabCount != 0;
                 }
+
                 return designerVerbs;
             }
         }
 
-        public IDesignerHost DesignerHost
-        {
-            get
-            {
-                return designerHost ?? (designerHost = (IDesignerHost)(GetService(typeof(IDesignerHost))));
-            }
-        }
+        public IDesignerHost DesignerHost =>
+            designerHost ?? (designerHost = (IDesignerHost) GetService(typeof(IDesignerHost)));
 
-        public ISelectionService SelectionService
-        {
-            get
-            {
-                return selectionService ?? (selectionService = (ISelectionService)(GetService(typeof(ISelectionService))));
-            }
-        }
-
-        #endregion
-
-        #region Constructor
-
-        public MetroTabControlDesigner()
-        {
-            var verb1 = new DesignerVerb("Add Tab", OnAddPage);
-            var verb2 = new DesignerVerb("Remove Tab", OnRemovePage);
-            designerVerbs.AddRange(new[] { verb1, verb2 });
-        }
+        public ISelectionService SelectionService => selectionService ??
+                                                     (selectionService =
+                                                         (ISelectionService) GetService(typeof(ISelectionService)));
 
         #endregion
 
         #region Private Methods
-        
-        private void OnAddPage(Object sender, EventArgs e)
+
+        private void OnAddPage(object sender, EventArgs e)
         {
             var parentControl = (MetroTabControl) Control;
             var oldTabs = parentControl.Controls;
 
             RaiseComponentChanging(TypeDescriptor.GetProperties(parentControl)["TabPages"]);
 
-            var p = (MetroTabPage)(DesignerHost.CreateComponent(typeof(MetroTabPage)));
+            var p = (MetroTabPage) DesignerHost.CreateComponent(typeof(MetroTabPage));
             p.Text = p.Name;
             parentControl.TabPages.Add(p);
 
             RaiseComponentChanged(TypeDescriptor.GetProperties(parentControl)["TabPages"],
-                                  oldTabs, parentControl.TabPages);
+                oldTabs, parentControl.TabPages);
             parentControl.SelectedTab = p;
 
             SetVerbs();
         }
 
-        private void OnRemovePage(Object sender, EventArgs e)
+        private void OnRemovePage(object sender, EventArgs e)
         {
             var parentControl = (MetroTabControl) Control;
             var oldTabs = parentControl.Controls;
 
-            if (parentControl.SelectedIndex < 0)
-            {
-                return;
-            }
+            if (parentControl.SelectedIndex < 0) return;
 
             RaiseComponentChanging(TypeDescriptor.GetProperties(parentControl)["TabPages"]);
 
             DesignerHost.DestroyComponent(parentControl.TabPages[parentControl.SelectedIndex]);
 
             RaiseComponentChanged(TypeDescriptor.GetProperties(parentControl)["TabPages"],
-                                  oldTabs, parentControl.TabPages);
+                oldTabs, parentControl.TabPages);
 
             SelectionService.SetSelectedComponents(new IComponent[]
             {
@@ -167,20 +153,18 @@ namespace MetroFramework.Design.Controls
             base.WndProc(ref m);
             switch (m.Msg)
             {
-                case (int)WinApi.Messages.WM_NCHITTEST:
-                    if (m.Result.ToInt32() == (int)WinApi.HitTest.HTTRANSPARENT)
-                    {
+                case (int) WinApi.Messages.WM_NCHITTEST:
+                    if (m.Result.ToInt32() == (int) WinApi.HitTest.HTTRANSPARENT)
                         m.Result = (IntPtr) WinApi.HitTest.HTCLIENT;
-                    }
                     break;
             }
         }
 
-        protected override bool GetHitTest(System.Drawing.Point point)
+        protected override bool GetHitTest(Point point)
         {
             if (SelectionService.PrimarySelection == Control)
             {
-                var hti = new MetroFramework.Native.WinApi.TCHITTESTINFO
+                var hti = new WinApi.TCHITTESTINFO
                 {
                     pt = Control.PointToClient(point),
                     flags = 0
@@ -193,18 +177,15 @@ namespace MetroFramework.Design.Controls
                 };
 
                 var lparam =
-                    System.Runtime.InteropServices.Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf(hti));
-                System.Runtime.InteropServices.Marshal.StructureToPtr(hti,
-                                                                      lparam, false);
+                    Marshal.AllocHGlobal(Marshal.SizeOf(hti));
+                Marshal.StructureToPtr(hti,
+                    lparam, false);
                 m.LParam = lparam;
 
                 base.WndProc(ref m);
-                System.Runtime.InteropServices.Marshal.FreeHGlobal(lparam);
+                Marshal.FreeHGlobal(lparam);
 
-                if (m.Result.ToInt32() != -1)
-                {
-                    return hti.flags != (int)WinApi.TabControlHitTest.TCHT_NOWHERE;
-                }
+                if (m.Result.ToInt32() != -1) return hti.flags != (int) WinApi.TabControlHitTest.TCHT_NOWHERE;
             }
 
             return false;
@@ -235,6 +216,7 @@ namespace MetroFramework.Design.Controls
 
             base.PreFilterProperties(properties);
         }
+
         #endregion
     }
 }

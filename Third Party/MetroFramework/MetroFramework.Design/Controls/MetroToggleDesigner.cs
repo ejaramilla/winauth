@@ -21,35 +21,35 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms.Design;
 
 namespace MetroFramework.Design.Controls
 {
     internal class MetroToggleDesigner : ControlDesigner
     {
-        protected override void PreFilterProperties(IDictionary properties)        
-        {            
-            properties.Remove("ImeMode");            
-            properties.Remove("Padding");            
-            properties.Remove("FlatAppearance");            
-            properties.Remove("FlatStyle");            
-     
-            properties.Remove("UseCompatibleTextRendering");                        
-            properties.Remove("Image");            
-            properties.Remove("ImageAlign");           
-            properties.Remove("ImageIndex");         
-            properties.Remove("ImageKey");        
-            properties.Remove("ImageList");     
-            properties.Remove("TextImageRelation");     
-             
-            properties.Remove("UseVisualStyleBackColor");   
-  
-            properties.Remove("Font");    
-            properties.Remove("RightToLeft");   
- 
-            base.PreFilterProperties(properties);  
+        protected override void PreFilterProperties(IDictionary properties)
+        {
+            properties.Remove("ImeMode");
+            properties.Remove("Padding");
+            properties.Remove("FlatAppearance");
+            properties.Remove("FlatStyle");
+
+            properties.Remove("UseCompatibleTextRendering");
+            properties.Remove("Image");
+            properties.Remove("ImageAlign");
+            properties.Remove("ImageIndex");
+            properties.Remove("ImageKey");
+            properties.Remove("ImageList");
+            properties.Remove("TextImageRelation");
+
+            properties.Remove("UseVisualStyleBackColor");
+
+            properties.Remove("Font");
+            properties.Remove("RightToLeft");
+
+            base.PreFilterProperties(properties);
         }
     }
 }

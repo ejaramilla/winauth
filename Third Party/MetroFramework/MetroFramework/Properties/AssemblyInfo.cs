@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using MetroFramework;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -39,10 +40,10 @@ using System.Security;
 [assembly: AssemblyVersion(MetroFrameworkAssembly.Version)]
 [assembly: AssemblyFileVersion(MetroFrameworkAssembly.Version)]
 
-[assembly:AllowPartiallyTrustedCallers]
+[assembly: AllowPartiallyTrustedCallers]
 
-[assembly: InternalsVisibleTo(MetroFramework.AssemblyRef.MetroFrameworkDesignIVT)]
-[assembly: InternalsVisibleTo(MetroFramework.AssemblyRef.MetroFrameworkFontsIVT)]
+[assembly: InternalsVisibleTo(AssemblyRef.MetroFrameworkDesignIVT)]
+[assembly: InternalsVisibleTo(AssemblyRef.MetroFrameworkFontsIVT)]
 
 internal static class MetroFrameworkAssembly
 {
@@ -58,26 +59,26 @@ namespace MetroFramework
 {
     public static class AssemblyRef
     {
-
         // Design
 
         public const string MetroFrameworkDesign_ = "MetroFramework.Design";
 
-				public const string MetroFrameworkDesignSN = "MetroFramework.Design, Version=" + MetroFrameworkAssembly.Version
-                                                       + ", Culture=neutral, PublicKeyToken=" + MetroFrameworkKeyToken;
+        public const string MetroFrameworkDesignSN = "MetroFramework.Design, Version=" + MetroFrameworkAssembly.Version
+            + ", Culture=neutral, PublicKeyToken=" + MetroFrameworkKeyToken;
 
-				public const string MetroFrameworkDesignIVT = "MetroFramework.Design, PublicKey=" + MetroFrameworkKeyFull;
+        public const string MetroFrameworkDesignIVT = "MetroFramework.Design, PublicKey=" + MetroFrameworkKeyFull;
 
         // Fonts
 
         internal const string MetroFrameworkFonts_ = "MetroFramework.Fonts";
 
         internal const string MetroFrameworkFontsSN = "MetroFramework.Fonts, Version=" + MetroFrameworkAssembly.Version
-                                                      + ", Culture=neutral, PublicKeyToken=" + MetroFrameworkKeyToken;
+            + ", Culture=neutral, PublicKeyToken=" + MetroFrameworkKeyToken;
 
         internal const string MetroFrameworkFontsIVT = "MetroFramework.Fonts, PublicKey=" + MetroFrameworkKeyFull;
 
-        internal const string MetroFrameworkFontResolver = "MetroFramework.Fonts.FontResolver, " + MetroFrameworkFontsSN;
+        internal const string MetroFrameworkFontResolver =
+            "MetroFramework.Fonts.FontResolver, " + MetroFrameworkFontsSN;
 
         // Strong Name Key
 

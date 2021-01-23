@@ -21,11 +21,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms.Design;
-
-using MetroFramework.Controls;
 
 namespace MetroFramework.Design.Controls
 {
@@ -35,18 +34,17 @@ namespace MetroFramework.Design.Controls
         {
             get
             {
-                PropertyDescriptor propDescriptor = TypeDescriptor.GetProperties(Component)["Multiline"];
+                var propDescriptor = TypeDescriptor.GetProperties(Component)["Multiline"];
 
                 if (propDescriptor != null)
                 {
-                    bool isMultiline = (bool)propDescriptor.GetValue(Component);
+                    var isMultiline = (bool) propDescriptor.GetValue(Component);
 
                     if (isMultiline)
-                    {
                         return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.AllSizeable;
-                    }
 
-                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable | SelectionRules.RightSizeable;
+                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable |
+                           SelectionRules.RightSizeable;
                 }
 
                 return base.SelectionRules;

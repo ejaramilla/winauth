@@ -21,15 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms.Design;
-
 using MetroFramework.Controls;
 
 namespace MetroFramework.Design.Controls
 {
-
     [Designer(typeof(ScrollableControlDesigner), typeof(ParentControlDesigner))]
     internal class MetroScrollBarDesigner : ControlDesigner
     {
@@ -37,18 +36,18 @@ namespace MetroFramework.Design.Controls
         {
             get
             {
-                PropertyDescriptor propDescriptor = TypeDescriptor.GetProperties(Component)["Orientation"];
+                var propDescriptor = TypeDescriptor.GetProperties(Component)["Orientation"];
 
                 if (propDescriptor != null)
                 {
-                    MetroScrollOrientation orientation = (MetroScrollOrientation)propDescriptor.GetValue(Component);
+                    var orientation = (MetroScrollOrientation) propDescriptor.GetValue(Component);
 
                     if (orientation == MetroScrollOrientation.Vertical)
-                    {
-                        return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.BottomSizeable | SelectionRules.TopSizeable;
-                    }
+                        return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.BottomSizeable |
+                               SelectionRules.TopSizeable;
 
-                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable | SelectionRules.RightSizeable;
+                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable |
+                           SelectionRules.RightSizeable;
                 }
 
                 return base.SelectionRules;

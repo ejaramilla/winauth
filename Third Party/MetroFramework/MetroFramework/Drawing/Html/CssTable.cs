@@ -24,9 +24,9 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
@@ -36,7 +36,7 @@ namespace MetroFramework.Drawing.Html
         #region Subclasses
 
         /// <summary>
-        /// Used to make space on vertical cell combination
+        ///     Used to make space on vertical cell combination
         /// </summary>
         public class SpacingBox
             : CssBox
@@ -49,31 +49,21 @@ namespace MetroFramework.Drawing.Html
                 ExtendedBox = extendedBox;
                 Display = CssConstants.None;
 
-                _startRow = startRow;
-                _endRow = startRow + int.Parse(extendedBox.GetAttribute("rowspan", "1")) - 1;
+                StartRow = startRow;
+                EndRow = startRow + int.Parse(extendedBox.GetAttribute("rowspan", "1")) - 1;
             }
 
             #region Props
 
-            private int _startRow;
             /// <summary>
-            /// Gets the index of the row where box starts
+            ///     Gets the index of the row where box starts
             /// </summary>
-            public int StartRow
-            {
-                get { return _startRow; }
-            }
-
-            private int _endRow;
+            public int StartRow { get; }
 
             /// <summary>
-            /// Gets the index of the row where box ends
+            ///     Gets the index of the row where box ends
             /// </summary>
-            public int EndRow
-            {
-                get { return _endRow; }
-            }
-
+            public int EndRow { get; }
 
             #endregion
         }
@@ -82,17 +72,6 @@ namespace MetroFramework.Drawing.Html
 
         #region Fields
 
-        private CssBox _tableBox;
-        private int _rowCount;
-        private int _columnCount;
-        private List<CssBox> _bodyrows;
-        private CssBox _caption;
-        private List<CssBox> _columns;
-        private CssBox _headerBox;
-        private CssBox _footerBox;
-        private List<CssBox> _allRows;
-        private float[] _columnWidths;
-        private bool _widthSpecified;
         private float[] _columnMinWidths;
 
         #endregion
@@ -101,18 +80,18 @@ namespace MetroFramework.Drawing.Html
 
         private CssTable()
         {
-            _bodyrows = new List<CssBox>();
-            _columns = new List<CssBox>();
-            _allRows = new List<CssBox>();
+            BodyRows = new List<CssBox>();
+            Columns = new List<CssBox>();
+            AllRows = new List<CssBox>();
         }
 
         public CssTable(CssBox tableBox, Graphics g)
-            :this()
+            : this()
         {
             if (!(tableBox.Display == CssConstants.Table || tableBox.Display == CssConstants.InlineTable))
                 throw new ArgumentException("Box is not a table", "tableBox");
 
-            _tableBox = tableBox;
+            TableBox = tableBox;
 
             MeasureWords(tableBox, g);
 
@@ -124,242 +103,193 @@ namespace MetroFramework.Drawing.Html
         #region Props
 
         /// <summary>
-        /// Gets if the user specified a width for the table
+        ///     Gets if the user specified a width for the table
         /// </summary>
-        public bool WidthSpecified
-        {
-            get { return _widthSpecified; }
-        }
+        public bool WidthSpecified { get; private set; }
 
         /// <summary>
-        /// Hosts a list of all rows in the table, including those on the TFOOT, THEAD and TBODY
+        ///     Hosts a list of all rows in the table, including those on the TFOOT, THEAD and TBODY
         /// </summary>
-        public List<CssBox> AllRows
-        {
-            get { return _allRows; }
-        }
+        public List<CssBox> AllRows { get; }
 
         /// <summary>
-        /// Gets the box that represents the caption of this table, if any.
-        /// WARNING: May be null
+        ///     Gets the box that represents the caption of this table, if any.
+        ///     WARNING: May be null
         /// </summary>
-        public CssBox Caption
-        {
-            get { return _caption; }
-        }
+        public CssBox Caption { get; private set; }
 
         /// <summary>
-        /// Gets the column count of this table
+        ///     Gets the column count of this table
         /// </summary>
-        public int ColumnCount
-        {
-            get { return _columnCount; }
-        }
+        public int ColumnCount { get; private set; }
 
         /// <summary>
-        /// Gets the minimum width of each column
+        ///     Gets the minimum width of each column
         /// </summary>
         public float[] ColumnMinWidths
         {
-            get 
+            get
             {
                 if (_columnMinWidths == null)
                 {
                     _columnMinWidths = new float[ColumnWidths.Length];
 
-                    foreach (CssBox row in AllRows)
+                    foreach (var row in AllRows)
+                    foreach (var cell in row.Boxes)
                     {
-                        foreach (CssBox cell in row.Boxes)
-                        {
-                            int colspan = GetColSpan(cell);
-                            int col = GetCellRealColumnIndex(row, cell);
-                            int affectcol = col + colspan - 1;
-                            float spannedwidth = GetSpannedMinWidth(row, cell, col, colspan) + (colspan - 1) * HorizontalSpacing;
+                        var colspan = GetColSpan(cell);
+                        var col = GetCellRealColumnIndex(row, cell);
+                        var affectcol = col + colspan - 1;
+                        var spannedwidth = GetSpannedMinWidth(row, cell, col, colspan) +
+                                           (colspan - 1) * HorizontalSpacing;
 
-                            _columnMinWidths[affectcol] = Math.Max(_columnMinWidths[affectcol], cell.GetMinimumWidth() - spannedwidth);
-
-                        }
+                        _columnMinWidths[affectcol] = Math.Max(_columnMinWidths[affectcol],
+                            cell.GetMinimumWidth() - spannedwidth);
                     }
-
                 }
 
-                return _columnMinWidths; 
+                return _columnMinWidths;
             }
         }
 
         /// <summary>
-        /// Gets the declared Columns on the TABLE tag
+        ///     Gets the declared Columns on the TABLE tag
         /// </summary>
-        public List<CssBox> Columns
-        {
-            get { return _columns; }
-        }
+        public List<CssBox> Columns { get; }
 
         /// <summary>
-        /// Gets an array indicating the withs of each column.
-        /// This must have the same count than <see cref="Columns"/>
+        ///     Gets an array indicating the withs of each column.
+        ///     This must have the same count than <see cref="Columns" />
         /// </summary>
-        public float[] ColumnWidths
-        {
-            get { return _columnWidths; }
-        }
+        public float[] ColumnWidths { get; private set; }
 
         /// <summary>
-        /// Gets the boxes that represents the table-row Boxes of the table, 
-        /// including those inside of the TBODY tags
+        ///     Gets the boxes that represents the table-row Boxes of the table,
+        ///     including those inside of the TBODY tags
         /// </summary>
-        public List<CssBox> BodyRows
-        {
-            get { return _bodyrows; }
-        }
+        public List<CssBox> BodyRows { get; }
 
         /// <summary>
-        /// Gets the table-footer-group Box
-        /// WARNING: May be null
+        ///     Gets the table-footer-group Box
+        ///     WARNING: May be null
         /// </summary>
-        public CssBox FooterBox
-        {
-            get { return _footerBox; }
-        }
+        public CssBox FooterBox { get; private set; }
 
         /// <summary>
-        /// Gets the table-header-group Box
-        /// WARNING: May be null
+        ///     Gets the table-header-group Box
+        ///     WARNING: May be null
         /// </summary>
-        public CssBox HeaderBox
-        {
-            get { return _headerBox; }
-        }
+        public CssBox HeaderBox { get; private set; }
 
         /// <summary>
-        /// Gets the actual horizontal spacing of the table
+        ///     Gets the actual horizontal spacing of the table
         /// </summary>
         public float HorizontalSpacing
         {
-            get 
+            get
             {
-                if (TableBox.BorderCollapse == CssConstants.Collapse)
-                {
-                    return -1f;
-                }
+                if (TableBox.BorderCollapse == CssConstants.Collapse) return -1f;
 
                 return TableBox.ActualBorderSpacingHorizontal;
             }
         }
 
         /// <summary>
-        /// Gets the actual vertical spacing of the table
+        ///     Gets the actual vertical spacing of the table
         /// </summary>
         public float VerticalSpacing
         {
             get
             {
-                if (TableBox.BorderCollapse == CssConstants.Collapse)
-                {
-                    return -1f;
-                }
+                if (TableBox.BorderCollapse == CssConstants.Collapse) return -1f;
 
                 return TableBox.ActualBorderSpacingVertical;
             }
         }
 
         /// <summary>
-        /// Gets the row count of this table, including the rows inside the table-row-group,
-        /// table-row-heaer and table-row-footer Boxes
+        ///     Gets the row count of this table, including the rows inside the table-row-group,
+        ///     table-row-heaer and table-row-footer Boxes
         /// </summary>
-        public int RowCount
-        {
-            get { return _rowCount; }
-        }
+        public int RowCount { get; private set; }
 
         /// <summary>
-        /// Gets the original table box
+        ///     Gets the original table box
         /// </summary>
-        public CssBox TableBox
-        {
-            get { return _tableBox; }
-        }
+        public CssBox TableBox { get; }
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// Analyzes the Table and assigns values to this CssTable object.
-        /// To be called from the constructor
+        ///     Analyzes the Table and assigns values to this CssTable object.
+        ///     To be called from the constructor
         /// </summary>
         private void Analyze(Graphics g)
         {
-            float availSpace = GetAvailableWidth();
-            float availCellSpace = float.NaN; //Will be set later
+            var availSpace = GetAvailableWidth();
+            var availCellSpace = float.NaN; //Will be set later
 
             #region Assign box kinds
-            foreach (CssBox b in TableBox.Boxes)
+
+            foreach (var b in TableBox.Boxes)
             {
                 b.RemoveAnonymousSpaces();
                 switch (b.Display)
                 {
                     case CssConstants.TableCaption:
-                        _caption = b;
+                        Caption = b;
                         break;
                     case CssConstants.TableColumn:
-                        for (int i = 0; i < GetSpan(b); i++)
-                        {
-                            Columns.Add(CreateColumn(b));
-                        }
+                        for (var i = 0; i < GetSpan(b); i++) Columns.Add(CreateColumn(b));
                         break;
                     case CssConstants.TableColumnGroup:
                         if (b.Boxes.Count == 0)
                         {
-                            int gspan = GetSpan(b);
-                            for (int i = 0; i < gspan; i++)
-                            {
-                                Columns.Add(CreateColumn(b));
-                            }
+                            var gspan = GetSpan(b);
+                            for (var i = 0; i < gspan; i++) Columns.Add(CreateColumn(b));
                         }
                         else
                         {
-                            foreach (CssBox bb in b.Boxes)
+                            foreach (var bb in b.Boxes)
                             {
-                                int bbspan = GetSpan(bb);
-                                for (int i = 0; i < bbspan; i++)
-                                {
-                                    Columns.Add(CreateColumn(bb));
-                                }
+                                var bbspan = GetSpan(bb);
+                                for (var i = 0; i < bbspan; i++) Columns.Add(CreateColumn(bb));
                             }
                         }
+
                         break;
                     case CssConstants.TableFooterGroup:
                         if (FooterBox != null)
                             BodyRows.Add(b);
                         else
-                            _footerBox = b;
+                            FooterBox = b;
                         break;
                     case CssConstants.TableHeaderGroup:
                         if (HeaderBox != null)
                             BodyRows.Add(b);
                         else
-                            _headerBox = b;
+                            HeaderBox = b;
                         break;
                     case CssConstants.TableRow:
                         BodyRows.Add(b);
                         break;
                     case CssConstants.TableRowGroup:
-                        foreach (CssBox bb in b.Boxes)
+                        foreach (var bb in b.Boxes)
                             if (b.Display == CssConstants.TableRow)
                                 BodyRows.Add(b);
                         break;
-                    default:
-                        break;
                 }
-            } 
+            }
+
             #endregion
 
             #region Gather AllRows
 
-            if (HeaderBox != null) _allRows.AddRange(HeaderBox.Boxes);
-            _allRows.AddRange(BodyRows);
-            if (FooterBox != null) _allRows.AddRange(FooterBox.Boxes);
+            if (HeaderBox != null) AllRows.AddRange(HeaderBox.Boxes);
+            AllRows.AddRange(BodyRows);
+            if (FooterBox != null) AllRows.AddRange(FooterBox.Boxes);
 
             #endregion
 
@@ -367,43 +297,43 @@ namespace MetroFramework.Drawing.Html
 
             if (!TableBox.TableFixed)
             {
-                int currow = 0;
-                int curcol = 0;
-                List<CssBox> rows = BodyRows;
+                var currow = 0;
+                var curcol = 0;
+                var rows = BodyRows;
 
-                foreach (CssBox row in rows)
+                foreach (var row in rows)
                 {
                     row.RemoveAnonymousSpaces();
                     curcol = 0;
-                    for(int k = 0; k < row.Boxes.Count ; k++)
+                    for (var k = 0; k < row.Boxes.Count; k++)
                     {
+                        var cell = row.Boxes[k];
+                        var rowspan = GetRowSpan(cell);
+                        var realcol = GetCellRealColumnIndex(row, cell); //Real column of the cell
 
-                        CssBox cell = row.Boxes[k];
-                        int rowspan = GetRowSpan(cell);
-                        int realcol = GetCellRealColumnIndex(row, cell); //Real column of the cell
-
-                        for (int i = currow + 1; i < currow + rowspan; i++)
+                        for (var i = currow + 1; i < currow + rowspan; i++)
                         {
-                            int colcount = 0;
-                            for (int j = 0; j <= rows[i].Boxes.Count; j++)
+                            var colcount = 0;
+                            for (var j = 0; j <= rows[i].Boxes.Count; j++)
                             {
                                 if (colcount == realcol)
                                 {
                                     rows[i].Boxes.Insert(colcount, new SpacingBox(TableBox, ref cell, currow));
                                     break;
                                 }
+
                                 colcount++;
                                 realcol -= GetColSpan(rows[i].Boxes[j]) - 1;
                             }
-
                         } // End for (int i = currow + 1; i < currow + rowspan; i++)
+
                         curcol++;
                     } /// End foreach (Box cell in row.Boxes)
+
                     currow++;
                 } /// End foreach (Box row in rows)
 
                 TableBox.TableFixed = true;
-
             } /// End if (!TableBox.TableFixed)
 
             #endregion
@@ -411,23 +341,23 @@ namespace MetroFramework.Drawing.Html
             #region Determine Row and Column Count, and ColumnWidths
 
             //Rows
-            _rowCount = BodyRows.Count +
-                (HeaderBox != null ? HeaderBox.Boxes.Count : 0) +
-                (FooterBox != null ? FooterBox.Boxes.Count : 0);
+            RowCount = BodyRows.Count +
+                       (HeaderBox != null ? HeaderBox.Boxes.Count : 0) +
+                       (FooterBox != null ? FooterBox.Boxes.Count : 0);
 
             //Columns
             if (Columns.Count > 0)
-                _columnCount = Columns.Count;
+                ColumnCount = Columns.Count;
             else
-                foreach (CssBox b in AllRows) //Check trhough rows
-                    _columnCount = Math.Max(_columnCount, b.Boxes.Count);
+                foreach (var b in AllRows) //Check trhough rows
+                    ColumnCount = Math.Max(ColumnCount, b.Boxes.Count);
 
             //Initialize column widths array
-            _columnWidths = new float[_columnCount];
+            ColumnWidths = new float[ColumnCount];
 
             //Fill them with NaNs
-            for (int i = 0; i < _columnWidths.Length; i++)
-                _columnWidths[i] = float.NaN;
+            for (var i = 0; i < ColumnWidths.Length; i++)
+                ColumnWidths[i] = float.NaN;
 
             availCellSpace = GetAvailableCellWidth();
 
@@ -435,20 +365,16 @@ namespace MetroFramework.Drawing.Html
             {
                 #region Fill ColumnWidths array by scanning column widths
 
-                for (int i = 0; i < Columns.Count; i++)
+                for (var i = 0; i < Columns.Count; i++)
                 {
-                    CssLength len = new CssLength(Columns[i].Width); //Get specified width
+                    var len = new CssLength(Columns[i].Width); //Get specified width
 
                     if (len.Number > 0) //If some width specified
                     {
-                        if (len.IsPercentage)//Get width as a percentage
-                        {
+                        if (len.IsPercentage) //Get width as a percentage
                             ColumnWidths[i] = CssValue.ParseNumber(Columns[i].Width, availCellSpace);
-                        }
                         else if (len.Unit == CssLength.CssUnit.Pixels || len.Unit == CssLength.CssUnit.None)
-                        {
                             ColumnWidths[i] = len.Number; //Get width as an absolute-pixel value
-                        }
                     }
                 }
 
@@ -457,39 +383,30 @@ namespace MetroFramework.Drawing.Html
             else
             {
                 #region Fill ColumnWidths array by scanning width in table-cell definitions
-                foreach (CssBox row in AllRows)
-                {
+
+                foreach (var row in AllRows)
                     //Check for column width in table-cell definitions
-                    for (int i = 0; i < _columnCount; i++)
-                    {
-                        if (float.IsNaN(ColumnWidths[i]) &&                 //Check if no width specified for column
-                            i < row.Boxes.Count &&                          //And there's a box to check
-                            row.Boxes[i].Display == CssConstants.TableCell)//And the box is a table-cell
+                    for (var i = 0; i < ColumnCount; i++)
+                        if (float.IsNaN(ColumnWidths[i]) && //Check if no width specified for column
+                            i < row.Boxes.Count && //And there's a box to check
+                            row.Boxes[i].Display == CssConstants.TableCell) //And the box is a table-cell
                         {
-                            CssLength len = new CssLength(row.Boxes[i].Width); //Get specified width
-                            
+                            var len = new CssLength(row.Boxes[i].Width); //Get specified width
+
                             if (len.Number > 0) //If some width specified
                             {
-                                int colspan = GetColSpan(row.Boxes[i]);
-                                float flen = 0f;
-                                if (len.IsPercentage)//Get width as a percentage
-                                {
+                                var colspan = GetColSpan(row.Boxes[i]);
+                                var flen = 0f;
+                                if (len.IsPercentage) //Get width as a percentage
                                     flen = CssValue.ParseNumber(row.Boxes[i].Width, availCellSpace);
-                                }
                                 else if (len.Unit == CssLength.CssUnit.Pixels || len.Unit == CssLength.CssUnit.None)
-                                {
                                     flen = len.Number; //Get width as an absolute-pixel value
-                                }
                                 flen /= Convert.ToSingle(colspan);
 
-                                for (int j = i; j < i + colspan; j++)
-                                {
-                                    ColumnWidths[j] = flen;
-                                }
+                                for (var j = i; j < i + colspan; j++) ColumnWidths[j] = flen;
                             }
                         }
-                    }
-                }
+
                 #endregion
             }
 
@@ -500,45 +417,41 @@ namespace MetroFramework.Drawing.Html
             if (WidthSpecified) //If a width was specified,
             {
                 //Assign NaNs equally with space left after gathering not-NaNs
-                int numberOfNans = 0;
-                float occupedSpace = 0f;
+                var numberOfNans = 0;
+                var occupedSpace = 0f;
 
                 //Calculate number of NaNs and occuped space
-                for (int i = 0; i < ColumnWidths.Length; i++)
+                for (var i = 0; i < ColumnWidths.Length; i++)
                     if (float.IsNaN(ColumnWidths[i]))
                         numberOfNans++;
                     else
                         occupedSpace += ColumnWidths[i];
 
                 //Determine width that will be assigned to un asigned widths
-                float nanWidth = (availCellSpace - occupedSpace) / Convert.ToSingle(numberOfNans);
+                var nanWidth = (availCellSpace - occupedSpace) / Convert.ToSingle(numberOfNans);
 
-                for (int i = 0; i < ColumnWidths.Length; i++)
+                for (var i = 0; i < ColumnWidths.Length; i++)
                     if (float.IsNaN(ColumnWidths[i]))
                         ColumnWidths[i] = nanWidth;
             }
             else
             {
                 //Assign NaNs using full width
-                float[] _maxFullWidths = new float[ColumnWidths.Length];
+                var _maxFullWidths = new float[ColumnWidths.Length];
 
                 //Get the maximum full length of NaN boxes
-                foreach (CssBox row in AllRows)
-                {
-                    for (int i = 0; i < row.Boxes.Count; i++)
+                foreach (var row in AllRows)
+                    for (var i = 0; i < row.Boxes.Count; i++)
                     {
-                        int col = GetCellRealColumnIndex(row, row.Boxes[i]);
+                        var col = GetCellRealColumnIndex(row, row.Boxes[i]);
 
                         if (float.IsNaN(ColumnWidths[col]) &&
                             i < row.Boxes.Count &&
                             GetColSpan(row.Boxes[i]) == 1)
-                        {
                             _maxFullWidths[col] = Math.Max(_maxFullWidths[col], row.Boxes[i].GetFullWidth(g));
-                        }
                     }
-                }
 
-                for (int i = 0; i < ColumnWidths.Length; i++)
+                for (var i = 0; i < ColumnWidths.Length; i++)
                     if (float.IsNaN(ColumnWidths[i]))
                         ColumnWidths[i] = _maxFullWidths[i];
             }
@@ -547,8 +460,8 @@ namespace MetroFramework.Drawing.Html
 
             #region Reduce widths if necessary
 
-            int curCol = 0;
-            float reduceAmount = 1f;
+            var curCol = 0;
+            var reduceAmount = 1f;
 
             //While table width is larger than it should, and width is reductable
             while (GetWidthSum() > GetAvailableWidth() && CanReduceWidth())
@@ -566,24 +479,19 @@ namespace MetroFramework.Drawing.Html
 
             #region Check for minimum sizes (increment widths if necessary)
 
-            foreach (CssBox row in AllRows)
+            foreach (var row in AllRows)
+            foreach (var cell in row.Boxes)
             {
-                foreach (CssBox cell in row.Boxes)
-                {
-                    int colspan = GetColSpan(cell);
-                    int col = GetCellRealColumnIndex(row, cell);
-                    int affectcol = col + colspan - 1;
-                    
-                    if (ColumnWidths[col] < ColumnMinWidths[col])
-                    {
-                        float diff = ColumnMinWidths[col] - ColumnWidths[col];
-                        ColumnWidths[affectcol] = ColumnMinWidths[affectcol];
+                var colspan = GetColSpan(cell);
+                var col = GetCellRealColumnIndex(row, cell);
+                var affectcol = col + colspan - 1;
 
-                        if (col < ColumnWidths.Length - 1)
-                        {
-                            ColumnWidths[col + 1] -= diff;
-                        }
-                    }
+                if (ColumnWidths[col] < ColumnMinWidths[col])
+                {
+                    var diff = ColumnMinWidths[col] - ColumnWidths[col];
+                    ColumnWidths[affectcol] = ColumnMinWidths[affectcol];
+
+                    if (col < ColumnWidths.Length - 1) ColumnWidths[col + 1] -= diff;
                 }
             }
 
@@ -598,60 +506,58 @@ namespace MetroFramework.Drawing.Html
             #region Layout cells
 
             //Actually layout cells!
-            float startx = TableBox.ClientLeft + HorizontalSpacing;
-            float starty = TableBox.ClientTop + VerticalSpacing;
-            float curx = startx;
-            float cury = starty;
-            float maxRight = startx;
-            float maxBottom = 0f;
-            int currentrow = 0;
+            var startx = TableBox.ClientLeft + HorizontalSpacing;
+            var starty = TableBox.ClientTop + VerticalSpacing;
+            var curx = startx;
+            var cury = starty;
+            var maxRight = startx;
+            var maxBottom = 0f;
+            var currentrow = 0;
 
-            foreach (CssBox row in AllRows)
+            foreach (var row in AllRows)
             {
                 if (row is CssAnonymousSpaceBlockBox || row is CssAnonymousSpaceBox) continue;
 
                 curx = startx;
                 curCol = 0;
 
-                foreach (CssBox cell in row.Boxes)
+                foreach (var cell in row.Boxes)
                 {
                     if (curCol >= ColumnWidths.Length) break;
 
-                    int rowspan = GetRowSpan(cell);
-                    float width = GetCellWidth(GetCellRealColumnIndex(row, cell), cell);
+                    var rowspan = GetRowSpan(cell);
+                    var width = GetCellWidth(GetCellRealColumnIndex(row, cell), cell);
 
                     cell.Location = new PointF(curx, cury);
                     cell.Size = new SizeF(width, 0f);
                     cell.MeasureBounds(g); //That will automatically set the bottom of the cell
 
                     //Alter max bottom only if row is cell's row + cell's rowspan - 1
-                    SpacingBox sb = cell as SpacingBox;
+                    var sb = cell as SpacingBox;
                     if (sb != null)
                     {
-                        if (sb.EndRow == currentrow)
-                        {
-                            maxBottom = Math.Max(maxBottom, sb.ExtendedBox.ActualBottom);
-                        }
+                        if (sb.EndRow == currentrow) maxBottom = Math.Max(maxBottom, sb.ExtendedBox.ActualBottom);
                     }
-                    else if(rowspan == 1)
+                    else if (rowspan == 1)
                     {
                         maxBottom = Math.Max(maxBottom, cell.ActualBottom);
                     }
+
                     maxRight = Math.Max(maxRight, cell.ActualRight);
                     curCol++;
                     curx = cell.ActualRight + HorizontalSpacing;
                 }
 
-                foreach (CssBox cell in row.Boxes)
+                foreach (var cell in row.Boxes)
                 {
-                    SpacingBox spacer = cell as SpacingBox;
+                    var spacer = cell as SpacingBox;
 
                     if (spacer == null && GetRowSpan(cell) == 1)
                     {
                         cell.ActualBottom = maxBottom;
                         CssLayoutEngine.ApplyCellVerticalAlignment(g, cell);
                     }
-                    else if(spacer != null && spacer.EndRow == currentrow)
+                    else if (spacer != null && spacer.EndRow == currentrow)
                     {
                         spacer.ExtendedBox.ActualBottom = maxBottom;
                         CssLayoutEngine.ApplyCellVerticalAlignment(g, spacer.ExtendedBox);
@@ -669,8 +575,8 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the spanned width of a cell
-        /// (With of all columns it spans minus one)
+        ///     Gets the spanned width of a cell
+        ///     (With of all columns it spans minus one)
         /// </summary>
         /// <param name="row"></param>
         /// <param name="cell"></param>
@@ -679,27 +585,25 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private float GetSpannedMinWidth(CssBox row, CssBox cell, int realcolindex, int colspan)
         {
-            float w = 0f;
+            var w = 0f;
 
-            for (int i = realcolindex; i < row.Boxes.Count || i < realcolindex + colspan - 1; i++)
-            {
+            for (var i = realcolindex; i < row.Boxes.Count || i < realcolindex + colspan - 1; i++)
                 w += ColumnMinWidths[i];
-            }
 
             return w;
         }
 
         /// <summary>
-        /// Gets the cell column index checking its position and other cells colspans
+        ///     Gets the cell column index checking its position and other cells colspans
         /// </summary>
         /// <param name="row"></param>
         /// <param name="cell"></param>
         /// <returns></returns>
         private int GetCellRealColumnIndex(CssBox row, CssBox cell)
         {
-            int i = 0;
+            var i = 0;
 
-            foreach (CssBox b in row.Boxes)
+            foreach (var b in row.Boxes)
             {
                 if (b.Equals(cell)) break;
                 i += GetColSpan(b);
@@ -709,64 +613,59 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the cells width, taking colspan and being in the specified column
+        ///     Gets the cells width, taking colspan and being in the specified column
         /// </summary>
         /// <param name="column"></param>
         /// <param name="b"></param>
         /// <returns></returns>
         private float GetCellWidth(int column, CssBox b)
         {
-            float colspan = Convert.ToSingle(GetColSpan(b));
-            float sum = 0f;
+            var colspan = Convert.ToSingle(GetColSpan(b));
+            var sum = 0f;
 
-            for (int i = column; i < column + colspan; i++)
+            for (var i = column; i < column + colspan; i++)
             {
                 if (column >= ColumnWidths.Length) break;
                 if (ColumnWidths.Length <= i) break;
-                sum += ColumnWidths[i]; 
+                sum += ColumnWidths[i];
             }
 
             sum += (colspan - 1) * HorizontalSpacing;
 
-            return sum; ;// -b.ActualBorderLeftWidth - b.ActualBorderRightWidth - b.ActualPaddingRight - b.ActualPaddingLeft;
+            return sum;
+            ; // -b.ActualBorderLeftWidth - b.ActualBorderRightWidth - b.ActualPaddingRight - b.ActualPaddingLeft;
         }
 
         /// <summary>
-        /// Gets the colspan of the specified box
+        ///     Gets the colspan of the specified box
         /// </summary>
         /// <param name="b"></param>
         private int GetColSpan(CssBox b)
         {
-            string att = b.GetAttribute("colspan", "1");
+            var att = b.GetAttribute("colspan", "1");
             int colspan;
 
-            if (!int.TryParse(att, out colspan))
-            {
-                return 1;
-            }
+            if (!int.TryParse(att, out colspan)) return 1;
 
             return colspan;
         }
 
         /// <summary>
-        /// Gets the rowspan of the specified box
+        ///     Gets the rowspan of the specified box
         /// </summary>
         /// <param name="b"></param>
         private int GetRowSpan(CssBox b)
         {
-            string att = b.GetAttribute("rowspan", "1");
+            var att = b.GetAttribute("rowspan", "1");
             int rowspan;
 
-            if (!int.TryParse(att, out rowspan))
-            {
-                return 1;
-            }
+            if (!int.TryParse(att, out rowspan)) return 1;
 
             return rowspan;
         }
 
         /// <summary>
-        /// Recursively measures the specified box
+        ///     Recursively measures the specified box
         /// </summary>
         /// <param name="b"></param>
         /// <param name="g"></param>
@@ -774,7 +673,7 @@ namespace MetroFramework.Drawing.Html
         {
             if (b == null) return;
 
-            foreach (CssBox bb in b.Boxes)
+            foreach (var bb in b.Boxes)
             {
                 bb.MeasureBounds(g);
                 Measure(bb, g);
@@ -782,7 +681,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Recursively measures words inside the box
+        ///     Recursively measures words inside the box
         /// </summary>
         /// <param name="b"></param>
         /// <param name="g"></param>
@@ -790,7 +689,7 @@ namespace MetroFramework.Drawing.Html
         {
             if (b == null) return;
 
-            foreach (CssBox bb in b.Boxes)
+            foreach (var bb in b.Boxes)
             {
                 bb.MeasureWordsSize(g);
                 MeasureWords(bb, g);
@@ -798,14 +697,14 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the number of reductable columns
+        ///     Gets the number of reductable columns
         /// </summary>
         /// <returns></returns>
         private int GetReductableColumns()
         {
-            int response = 0;
+            var response = 0;
 
-            for (int i = 0; i < ColumnWidths.Length; i++)
+            for (var i = 0; i < ColumnWidths.Length; i++)
                 if (CanReduceWidth(i))
                     response++;
 
@@ -813,26 +712,22 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Tells if the columns widths can be reduced,
-        /// by checking the minimum widths of all cells
+        ///     Tells if the columns widths can be reduced,
+        ///     by checking the minimum widths of all cells
         /// </summary>
         /// <returns></returns>
         private bool CanReduceWidth()
         {
-            for (int i = 0; i < ColumnWidths.Length; i++)
-            {
+            for (var i = 0; i < ColumnWidths.Length; i++)
                 if (CanReduceWidth(i))
-                {
                     return true;
-                }
-            }
 
             return false;
         }
 
         /// <summary>
-        /// Tells if the specified column can be reduced,
-        /// by checking its minimum width
+        ///     Tells if the specified column can be reduced,
+        ///     by checking its minimum width
         /// </summary>
         /// <param name="columnIndex"></param>
         /// <returns></returns>
@@ -843,65 +738,58 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the available width for the whole table.
-        /// It also sets the value of <see cref="WidthSpecified"/>
+        ///     Gets the available width for the whole table.
+        ///     It also sets the value of <see cref="WidthSpecified" />
         /// </summary>
         /// <returns></returns>
         /// <remarks>
-        /// The table's width can be larger than the result of this method, because of the minimum 
-        /// size that individual boxes.
+        ///     The table's width can be larger than the result of this method, because of the minimum
+        ///     size that individual boxes.
         /// </remarks>
         private float GetAvailableWidth()
         {
-            CssLength tblen = new CssLength(TableBox.Width);
+            var tblen = new CssLength(TableBox.Width);
 
             if (tblen.Number > 0)
             {
-                _widthSpecified = true;
+                WidthSpecified = true;
 
                 if (tblen.IsPercentage)
-                {
                     return CssValue.ParseNumber(tblen.Length, TableBox.ParentBox.AvailableWidth);
-                }
-                else
-                {
-                    return tblen.Number;
-                }
+                return tblen.Number;
             }
-            else
-            {
-                return TableBox.ParentBox.AvailableWidth;
-            }
+
+            return TableBox.ParentBox.AvailableWidth;
         }
 
         /// <summary>
-        /// Gets the width available for cells
+        ///     Gets the width available for cells
         /// </summary>
         /// <returns></returns>
         /// <remarks>
-        /// It takes away the cell-spacing from <see cref="GetAvailableWidth()"/>
+        ///     It takes away the cell-spacing from <see cref="GetAvailableWidth()" />
         /// </remarks>
         private float GetAvailableCellWidth()
         {
-            return GetAvailableWidth() - 
-                HorizontalSpacing * (ColumnCount + 1) -
-                TableBox.ActualBorderLeftWidth - TableBox.ActualBorderRightWidth;
+            return GetAvailableWidth() -
+                   HorizontalSpacing * (ColumnCount + 1) -
+                   TableBox.ActualBorderLeftWidth - TableBox.ActualBorderRightWidth;
         }
 
         /// <summary>
-        /// Gets the current sum of column widths
+        ///     Gets the current sum of column widths
         /// </summary>
         /// <returns></returns>
         private float GetWidthSum()
         {
-            float f = 0f;
+            var f = 0f;
 
-            for (int i = 0; i < ColumnWidths.Length; i++)
+            for (var i = 0; i < ColumnWidths.Length; i++)
                 if (float.IsNaN(ColumnWidths[i]))
                     throw new Exception("CssTable Algorithm error: There's a NaN in column widths");
                 else
                     f += ColumnWidths[i];
-            
+
             //Take cell-spacing
             f += HorizontalSpacing * (ColumnWidths.Length + 1);
 
@@ -912,18 +800,18 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Gets the span attribute of the tag of the specified box
+        ///     Gets the span attribute of the tag of the specified box
         /// </summary>
         /// <param name="b"></param>
         private int GetSpan(CssBox b)
         {
-            float f = CssValue.ParseNumber(b.GetAttribute("span"), 1);
+            var f = CssValue.ParseNumber(b.GetAttribute("span"), 1);
 
             return Math.Max(1, Convert.ToInt32(f));
         }
 
         /// <summary>
-        /// Creates the column with the specified width
+        ///     Creates the column with the specified width
         /// </summary>
         /// <param name="width"></param>
         /// <returns></returns>
@@ -938,4 +826,3 @@ namespace MetroFramework.Drawing.Html
         #endregion
     }
 }
-

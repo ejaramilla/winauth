@@ -21,11 +21,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 using MetroFramework.Animation;
 using MetroFramework.Components;
 using MetroFramework.Controls;
@@ -38,6 +37,37 @@ namespace MetroFramework.Forms
     public sealed class MetroTaskWindow : MetroForm
     {
         private static MetroTaskWindow singletonWindow;
+
+        private readonly int closeTime;
+
+        private readonly MetroPanel controlContainer;
+
+        private int elapsedTime;
+
+
+        private bool isInitialized;
+        private int progressWidth;
+        private DelayedCall timer;
+
+        public MetroTaskWindow()
+        {
+            controlContainer = new MetroPanel();
+            Controls.Add(controlContainer);
+        }
+
+        public MetroTaskWindow(int duration, Control userControl)
+            : this()
+        {
+            controlContainer.Controls.Add(userControl);
+            userControl.Dock = DockStyle.Fill;
+            closeTime = duration * 500;
+
+            if (closeTime > 0)
+                timer = DelayedCall.Start(UpdateProgress, 5);
+        }
+
+        public bool CancelTimer { get; set; }
+
         public static void ShowTaskWindow(IWin32Window parent, string title, Control userControl, int secToClose)
         {
             if (singletonWindow != null)
@@ -52,12 +82,13 @@ namespace MetroFramework.Forms
             singletonWindow.Resizable = false;
             singletonWindow.Movable = true;
             singletonWindow.StartPosition = FormStartPosition.Manual;
-            
+
             if (parent != null && parent is IMetroForm)
             {
-                singletonWindow.Theme = ((IMetroForm)parent).Theme;
-                singletonWindow.Style = ((IMetroForm)parent).Style;
-                singletonWindow.StyleManager = ((IMetroForm)parent).StyleManager.Clone(singletonWindow) as MetroStyleManager;
+                singletonWindow.Theme = ((IMetroForm) parent).Theme;
+                singletonWindow.Style = ((IMetroForm) parent).Style;
+                singletonWindow.StyleManager =
+                    ((IMetroForm) parent).StyleManager.Clone(singletonWindow) as MetroStyleManager;
             }
 
             singletonWindow.Show();
@@ -65,7 +96,7 @@ namespace MetroFramework.Forms
 
         public static bool IsVisible()
         {
-            return (singletonWindow != null && singletonWindow.Visible);
+            return singletonWindow != null && singletonWindow.Visible;
         }
 
         public static void ShowTaskWindow(IWin32Window parent, string text, Control userControl)
@@ -100,39 +131,6 @@ namespace MetroFramework.Forms
             }
         }
 
-        private bool cancelTimer = false;
-        public bool CancelTimer
-        {
-            get { return cancelTimer; }
-            set { cancelTimer = value; }
-        }
-
-        private readonly int closeTime = 0;
-        private int elapsedTime = 0;
-        private int progressWidth = 0;
-        private DelayedCall timer;
-
-        private readonly MetroPanel controlContainer;
-
-        public MetroTaskWindow()
-        {
-            controlContainer = new MetroPanel();
-            Controls.Add(controlContainer);
-        }
-
-        public MetroTaskWindow(int duration, Control userControl)
-            : this()
-        {
-            controlContainer.Controls.Add(userControl);
-            userControl.Dock = DockStyle.Fill;
-            closeTime = duration * 500;
-
-            if (closeTime > 0)
-                timer = DelayedCall.Start(UpdateProgress, 5);
-        }
-
-
-        private bool isInitialized = false;
         protected override void OnActivated(EventArgs e)
         {
             if (!isInitialized)
@@ -149,7 +147,7 @@ namespace MetroFramework.Forms
 
                 Size = new Size(400, 200);
 
-                Taskbar myTaskbar = new Taskbar();
+                var myTaskbar = new Taskbar();
                 switch (myTaskbar.Position)
                 {
                     case TaskbarPosition.Left:
@@ -166,27 +164,26 @@ namespace MetroFramework.Forms
                         break;
                     case TaskbarPosition.Unknown:
                     default:
-                        Location = new Point(Screen.PrimaryScreen.Bounds.Width - Width - 5, Screen.PrimaryScreen.Bounds.Height - Height - 5);
+                        Location = new Point(Screen.PrimaryScreen.Bounds.Width - Width - 5,
+                            Screen.PrimaryScreen.Bounds.Height - Height - 5);
                         break;
                 }
 
                 controlContainer.Location = new Point(0, 60);
                 controlContainer.Size = new Size(Width - 40, Height - 80);
-                controlContainer.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
+                controlContainer.Anchor =
+                    AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
 
                 controlContainer.AutoScroll = false;
                 controlContainer.HorizontalScrollbar = false;
                 controlContainer.VerticalScrollbar = false;
                 controlContainer.Refresh();
 
-                if (StyleManager != null)
-                {
-                    StyleManager.Update();
-                }
+                if (StyleManager != null) StyleManager.Update();
 
                 isInitialized = true;
 
-                MoveAnimation myMoveAnim = new MoveAnimation();
+                var myMoveAnim = new MoveAnimation();
                 myMoveAnim.Start(controlContainer, new Point(20, 60), TransitionType.EaseInOutCubic, 15);
             }
 
@@ -197,7 +194,7 @@ namespace MetroFramework.Forms
         {
             base.OnPaint(e);
 
-            using (SolidBrush b = new SolidBrush(MetroPaint.BackColor.Form(Theme)))
+            using (var b = new SolidBrush(MetroPaint.BackColor.Form(Theme)))
             {
                 e.Graphics.FillRectangle(b, new Rectangle(Width - progressWidth, 0, progressWidth, 5));
             }
@@ -215,14 +212,14 @@ namespace MetroFramework.Forms
 
             elapsedTime += 5;
 
-            if (cancelTimer)
+            if (CancelTimer)
                 elapsedTime = 0;
 
-            double perc = (double)elapsedTime / ((double)closeTime / 100);
-            progressWidth = (int)((double)Width * (perc / 100));
-            Invalidate(new Rectangle(0,0,Width,5));
+            var perc = elapsedTime / ((double) closeTime / 100);
+            progressWidth = (int) (Width * (perc / 100));
+            Invalidate(new Rectangle(0, 0, Width, 5));
 
-            if (!cancelTimer)
+            if (!CancelTimer)
                 timer.Reset();
         }
     }

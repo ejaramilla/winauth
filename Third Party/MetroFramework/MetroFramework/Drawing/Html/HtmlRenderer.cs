@@ -24,11 +24,11 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
+
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Reflection;
 
 namespace MetroFramework.Drawing.Html
 {
@@ -37,32 +37,26 @@ namespace MetroFramework.Drawing.Html
         #region References
 
         /// <summary>
-        /// List of assembly references
+        ///     List of assembly references
         /// </summary>
-        private static List<Assembly> _references;
+        private static readonly List<Assembly> _references;
 
         /// <summary>
-        /// Gets a list of Assembly references used to search for external references
+        ///     Gets a list of Assembly references used to search for external references
         /// </summary>
         /// <remarks>
-        /// This references are used when loading images and other content, when
-        /// rendering a piece of HTML/CSS
+        ///     This references are used when loading images and other content, when
+        ///     rendering a piece of HTML/CSS
         /// </remarks>
-        public static List<Assembly> References
-        {
-            get { return _references; }
-        }
+        public static List<Assembly> References => _references;
 
         /// <summary>
-        /// Adds a reference to the References list if not yet listed
+        ///     Adds a reference to the References list if not yet listed
         /// </summary>
         /// <param name="assembly"></param>
         internal static void AddReference(Assembly assembly)
         {
-            if (!References.Contains(assembly))
-            {
-                References.Add(assembly);
-            }
+            if (!References.Contains(assembly)) References.Add(assembly);
         }
 
         static HtmlRenderer()
@@ -79,7 +73,7 @@ namespace MetroFramework.Drawing.Html
         #region Methods
 
         /// <summary>
-        /// Draws the HTML on the specified point using the specified width.
+        ///     Draws the HTML on the specified point using the specified width.
         /// </summary>
         /// <param name="g">Device to draw</param>
         /// <param name="html">HTML source</param>
@@ -91,7 +85,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Renders the specified HTML source on the specified area clipping if specified
+        ///     Renders the specified HTML source on the specified area clipping if specified
         /// </summary>
         /// <param name="g">Device to draw</param>
         /// <param name="html">HTML source</param>
@@ -99,8 +93,8 @@ namespace MetroFramework.Drawing.Html
         /// <param name="clip">If true, it will only paint on the specified area</param>
         public static void Render(Graphics g, string html, RectangleF area, bool clip)
         {
-            InitialContainer container = new InitialContainer(html);
-            Region prevClip = g.Clip;
+            var container = new InitialContainer(html);
+            var prevClip = g.Clip;
 
             if (clip) g.SetClip(area);
 
@@ -108,7 +102,7 @@ namespace MetroFramework.Drawing.Html
             container.MeasureBounds(g);
             container.Paint(g);
 
-            if (clip) g.SetClip(prevClip, System.Drawing.Drawing2D.CombineMode.Replace);
+            if (clip) g.SetClip(prevClip, CombineMode.Replace);
         }
 
         #endregion

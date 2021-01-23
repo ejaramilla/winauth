@@ -24,14 +24,13 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Defines HTML strings
+    ///     Defines HTML strings
     /// </summary>
     [CLSCompliant(false)]
     public class HtmlConstants
@@ -255,6 +254,5 @@ namespace MetroFramework.Drawing.Html
         public const string middle = "middle";
         public const string bottom = "bottom";
         public const string justify = "justify";
-
     }
 }

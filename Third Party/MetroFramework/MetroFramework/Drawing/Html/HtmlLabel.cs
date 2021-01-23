@@ -24,32 +24,29 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Provides HTML rendering on the text of the label
+    ///     Provides HTML rendering on the text of the label
     /// </summary>
     [CLSCompliant(false)]
     public class HtmlLabel
         : HtmlPanel
     {
-        #region Fields
-
-        #endregion
-
         #region Ctor
 
         /// <summary>
-        /// Creates a new HTML Label
+        ///     Creates a new HTML Label
         /// </summary>
         public HtmlLabel()
         {
-            SetStyle(System.Windows.Forms.ControlStyles.Opaque, false);
+            SetStyle(ControlStyles.Opaque, false);
 
             AutoScroll = false;
         }
@@ -63,20 +60,18 @@ namespace MetroFramework.Drawing.Html
         [Browsable(true)]
         public override bool AutoSize
         {
-            get
-            {
-                return base.AutoSize;
-            }
+            get => base.AutoSize;
             set
             {
                 base.AutoSize = value;
 
-                if (value)
-                {
-                    MeasureBounds();
-                }
+                if (value) MeasureBounds();
             }
         }
+
+        #endregion
+
+        #region Fields
 
         #endregion
 
@@ -84,21 +79,21 @@ namespace MetroFramework.Drawing.Html
 
         protected override void CreateFragment()
         {
-            string text = Text;
-            string font = string.Format("font: {0}pt {1}", Font.Size, Font.FontFamily.Name);
+            var text = Text;
+            var font = string.Format("font: {0}pt {1}", Font.Size, Font.FontFamily.Name);
 
             //Create fragment container
-            htmlContainer = new InitialContainer("<table border=0 cellspacing=5 cellpadding=0 style=\"" + font + "\"><tr><td>" + text + "</td></tr></table>");
+            htmlContainer = new InitialContainer("<table border=0 cellspacing=5 cellpadding=0 style=\"" + font +
+                                                 "\"><tr><td>" + text + "</td></tr></table>");
             //_htmlContainer.SetBounds(new Rectangle(0, 0, 10, 10));
-            
         }
 
         public override void MeasureBounds()
         {
             base.MeasureBounds();
 
-            if(htmlContainer != null && AutoSize)
-                Size = System.Drawing.Size.Round(htmlContainer.MaximumSize);
+            if (htmlContainer != null && AutoSize)
+                Size = Size.Round(htmlContainer.MaximumSize);
         }
 
         #endregion

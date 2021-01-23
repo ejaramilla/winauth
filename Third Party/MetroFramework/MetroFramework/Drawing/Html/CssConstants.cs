@@ -24,14 +24,11 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// String constants to avoid typing errors.
+    ///     String constants to avoid typing errors.
     /// </summary>
     public class CssConstants
     {
@@ -103,46 +100,47 @@ namespace MetroFramework.Drawing.Html
         public const string XSmall = "x-small";
         public const string XXLarge = "xx-large";
         public const string XXSmall = "xx-small";
-        
+
 
         #region Units
+
         /// <summary>
-        /// Centimeters
+        ///     Centimeters
         /// </summary>
         public const string Cm = "cm";
 
         /// <summary>
-        /// Milimeters
+        ///     Milimeters
         /// </summary>
         public const string Mm = "mm";
 
         /// <summary>
-        /// Pixels
+        ///     Pixels
         /// </summary>
         public const string Px = "px";
 
         /// <summary>
-        /// Inches
+        ///     Inches
         /// </summary>
         public const string In = "in";
 
         /// <summary>
-        /// Em - The font size of the relevant font
+        ///     Em - The font size of the relevant font
         /// </summary>
         public const string Em = "em";
 
         /// <summary>
-        /// The 'x-height' of the relevan font
+        ///     The 'x-height' of the relevan font
         /// </summary>
         public const string Ex = "ex";
 
         /// <summary>
-        /// Points
+        ///     Points
         /// </summary>
         public const string Pt = "pt";
 
         /// <summary>
-        /// Picas
+        ///     Picas
         /// </summary>
         public const string Pc = "pc";
 

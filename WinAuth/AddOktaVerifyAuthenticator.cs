@@ -17,30 +17,24 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using System.Web;
-
+using System.Windows.Forms;
 using ZXing;
 
 namespace WinAuth
 {
     /// <summary>
-    /// Okta Verify Authenticator Form
+    ///     Okta Verify Authenticator Form
     /// </summary>
     public partial class AddOktaVerifyAuthenticator : ResourceForm
-    {    
+    {
         /// <summary>
-        /// Form instantiation
+        ///     Form instantiation
         /// </summary>
         public AddOktaVerifyAuthenticator()
         {
@@ -48,51 +42,48 @@ namespace WinAuth
         }
 
         /// <summary>
-        /// Current authenticator
+        ///     Current authenticator
         /// </summary>
         public WinAuthAuthenticator Authenticator { get; set; }
 
         #region Form Events
 
         /// <summary>
-        /// Load the form
+        ///     Load the form
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void AddOktaVerifyAuthenticator_Load(object sender, EventArgs e)
         {
-            nameField.Text = this.Authenticator.Name;
+            nameField.Text = Authenticator.Name;
             codeField.SecretMode = true;
         }
 
         /// <summary>
-        /// Ticker event
+        ///     Ticker event
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void newAuthenticatorTimer_Tick(object sender, EventArgs e)
         {
-            if (this.Authenticator.AuthenticatorData != null && newAuthenticatorProgress.Visible == true)
+            if (Authenticator.AuthenticatorData != null && newAuthenticatorProgress.Visible)
             {
-                int time = (int)(this.Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
+                var time = (int) (Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
                 newAuthenticatorProgress.Value = time + 1;
-                if (time == 0)
-                {
-                    codeField.Text = this.Authenticator.AuthenticatorData.CurrentCode;
-                }
+                if (time == 0) codeField.Text = Authenticator.AuthenticatorData.CurrentCode;
             }
         }
 
-     
+
         /// <summary>
-        /// Click to add the code
+        ///     Click to add the code
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void verifyAuthenticatorButton_Click(object sender, EventArgs e)
         {
-            string privatekey = this.secretCodeField.Text.Trim();
-            if (string.IsNullOrEmpty(privatekey) == true)
+            var privatekey = secretCodeField.Text.Trim();
+            if (string.IsNullOrEmpty(privatekey))
             {
                 WinAuthForm.ErrorDialog(this, "Please enter the secret code");
                 return;
@@ -102,82 +93,79 @@ namespace WinAuth
         }
 
         /// <summary>
-        /// Click the cancel button and show a warning
+        ///     Click the cancel button and show a warning
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            if (this.Authenticator.AuthenticatorData != null)
+            if (Authenticator.AuthenticatorData != null)
             {
-                DialogResult result = WinAuthForm.ConfirmDialog(this.Owner,
+                var result = WinAuthForm.ConfirmDialog(Owner,
                     "WARNING: Your authenticator has not been saved." + Environment.NewLine + Environment.NewLine
-                    + "If you have added this authenticator to your account, you will not be able to login in the future, and you need to click YES to save it." + Environment.NewLine + Environment.NewLine
+                    + "If you have added this authenticator to your account, you will not be able to login in the future, and you need to click YES to save it." +
+                    Environment.NewLine + Environment.NewLine
                     + "Do you want to save this authenticator?", MessageBoxButtons.YesNoCancel);
-                if (result == System.Windows.Forms.DialogResult.Yes)
+                if (result == DialogResult.Yes)
                 {
-                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
-                    return;
+                    DialogResult = DialogResult.OK;
                 }
-                else if (result == System.Windows.Forms.DialogResult.Cancel)
+                else if (result == DialogResult.Cancel)
                 {
-                    this.DialogResult = System.Windows.Forms.DialogResult.None;
-                    return;
+                    DialogResult = DialogResult.None;
                 }
             }
         }
 
         /// <summary>
-        /// Click the OK button to verify and add the authenticator
+        ///     Click the OK button to verify and add the authenticator
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void okButton_Click(object sender, EventArgs e)
         {
-            string privatekey = this.secretCodeField.Text.Trim();
+            var privatekey = secretCodeField.Text.Trim();
             if (privatekey.Length == 0)
             {
-                WinAuthForm.ErrorDialog(this.Owner, "Please enter the Secret Code");
-                this.DialogResult = System.Windows.Forms.DialogResult.None;
+                WinAuthForm.ErrorDialog(Owner, "Please enter the Secret Code");
+                DialogResult = DialogResult.None;
                 return;
             }
 
-            bool first = !this.newAuthenticatorProgress.Visible;
+            var first = !newAuthenticatorProgress.Visible;
             if (verifyAuthenticator(privatekey) == false)
             {
-                this.DialogResult = System.Windows.Forms.DialogResult.None;
-                return;
-            }
-            if (first == true)
-            {
-                this.DialogResult = System.Windows.Forms.DialogResult.None;
+                DialogResult = DialogResult.None;
                 return;
             }
 
-            if (this.Authenticator.AuthenticatorData == null)
+            if (first)
             {
-                WinAuthForm.ErrorDialog(this.Owner, "Please enter the Secret Code and click Verify Authenticator");
-                this.DialogResult = System.Windows.Forms.DialogResult.None;
+                DialogResult = DialogResult.None;
                 return;
+            }
+
+            if (Authenticator.AuthenticatorData == null)
+            {
+                WinAuthForm.ErrorDialog(Owner, "Please enter the Secret Code and click Verify Authenticator");
+                DialogResult = DialogResult.None;
             }
         }
 
         /// <summary>
-        /// Select one of the icons
+        ///     Select one of the icons
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void iconRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            if (((RadioButton)sender).Checked == true)
-            {
-                this.Authenticator.Skin = (string)((RadioButton)sender).Tag;
-            }
+            if (((RadioButton) sender).Checked) Authenticator.Skin = (string) ((RadioButton) sender).Tag;
         }
 
         private void helpLink_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://support.okta.com/help/Documentation/Knowledge_Article/How-to-Configure-WinAuth-for-Okta-MFA");
+            Process.Start(
+                "https://support.okta.com/help/Documentation/Knowledge_Article/How-to-Configure-WinAuth-for-Okta-MFA");
         }
 
         #endregion
@@ -185,7 +173,7 @@ namespace WinAuth
         #region Private methods
 
         /// <summary>
-        /// Check if a filename is valid and such a file exists
+        ///     Check if a filename is valid and such a file exists
         /// </summary>
         /// <param name="filename">filename to check</param>
         /// <returns>true if valid and exists</returns>
@@ -197,107 +185,95 @@ namespace WinAuth
                 new FileInfo(filename);
                 return File.Exists(filename);
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+            }
 
             return false;
         }
 
         /// <summary>
-        /// Verify and create the authenticator if needed
+        ///     Verify and create the authenticator if needed
         /// </summary>
         /// <returns>true is successful</returns>
         private bool verifyAuthenticator(string privatekey)
         {
-            if (string.IsNullOrEmpty(privatekey) == true)
-            {
-                return false;
-            }
+            if (string.IsNullOrEmpty(privatekey)) return false;
 
-            this.Authenticator.Name = nameField.Text;
+            Authenticator.Name = nameField.Text;
 
-            string authtype = "totp";
+            var authtype = "totp";
 
             // if this is a URL, pull it down
             Uri uri;
             Match match;
-            if (Regex.IsMatch(privatekey, "https?://.*") == true && Uri.TryCreate(privatekey, UriKind.Absolute, out uri) == true)
+            if (Regex.IsMatch(privatekey, "https?://.*") && Uri.TryCreate(privatekey, UriKind.Absolute, out uri))
             {
                 try
                 {
-                    var request = (HttpWebRequest)WebRequest.Create(uri);
+                    var request = (HttpWebRequest) WebRequest.Create(uri);
                     request.AllowAutoRedirect = true;
                     request.Timeout = 20000;
                     request.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)";
-                    using (var response = (HttpWebResponse)request.GetResponse())
+                    using (var response = (HttpWebResponse) request.GetResponse())
                     {
-                        if (response.StatusCode == HttpStatusCode.OK && response.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true)
-                        {
-                            using (Bitmap bitmap = (Bitmap)Bitmap.FromStream(response.GetResponseStream()))
+                        if (response.StatusCode == HttpStatusCode.OK &&
+                            response.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                            using (var bitmap = (Bitmap) Image.FromStream(response.GetResponseStream()))
                             {
                                 IBarcodeReader reader = new BarcodeReader();
                                 var result = reader.Decode(bitmap);
-                                if (result != null)
-                                {
-                                    privatekey = HttpUtility.UrlDecode(result.Text);
-                                }
+                                if (result != null) privatekey = HttpUtility.UrlDecode(result.Text);
                             }
-                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    WinAuthForm.ErrorDialog(this.Owner, "Cannot load QR code image from " + privatekey, ex);
+                    WinAuthForm.ErrorDialog(Owner, "Cannot load QR code image from " + privatekey, ex);
                     return false;
                 }
             }
-            else if ((match = Regex.Match(privatekey, @"data:image/([^;]+);base64,(.*)", RegexOptions.IgnoreCase)).Success == true)
+            else if ((match = Regex.Match(privatekey, @"data:image/([^;]+);base64,(.*)", RegexOptions.IgnoreCase))
+                .Success)
             {
-                byte[] imagedata = Convert.FromBase64String(match.Groups[2].Value);
-                using (MemoryStream ms = new MemoryStream(imagedata))
+                var imagedata = Convert.FromBase64String(match.Groups[2].Value);
+                using (var ms = new MemoryStream(imagedata))
                 {
-                    using (Bitmap bitmap = (Bitmap)Bitmap.FromStream(ms))
+                    using (var bitmap = (Bitmap) Image.FromStream(ms))
                     {
                         IBarcodeReader reader = new BarcodeReader();
                         var result = reader.Decode(bitmap);
-                        if (result != null)
-                        {
-                            privatekey = HttpUtility.UrlDecode(result.Text);
-                        }
+                        if (result != null) privatekey = HttpUtility.UrlDecode(result.Text);
                     }
                 }
             }
-            else if (IsValidFile(privatekey) == true)
+            else if (IsValidFile(privatekey))
             {
                 // assume this is the image file
-                using (Bitmap bitmap = (Bitmap)Bitmap.FromFile(privatekey))
+                using (var bitmap = (Bitmap) Image.FromFile(privatekey))
                 {
                     IBarcodeReader reader = new BarcodeReader();
                     var result = reader.Decode(bitmap);
-                    if (result != null)
-                    {
-                        privatekey = result.Text;
-                    }
+                    if (result != null) privatekey = result.Text;
                 }
             }
 
             // check for otpauth://, e.g. "otpauth://totp/dc3bf64c-2fd4-40fe-a8cf-83315945f08b@blockchain.info?secret=IHZJDKAEEC774BMUK3GX6SA"
             match = Regex.Match(privatekey, @"otpauth://([^/]+)/([^?]+)\?(.*)", RegexOptions.IgnoreCase);
-            if (match.Success == true)
+            if (match.Success)
             {
                 authtype = match.Groups[1].Value; // @todo we only handle totp (not hotp)
                 if (string.Compare(authtype, "totp", true) != 0)
                 {
-                    WinAuthForm.ErrorDialog(this.Owner, "Only time-based (TOTP) authenticators are supported when adding an Okta Verify Authenticator. Use the general \"Add Authenticator\" for counter-based (HOTP) authenticators.");
+                    WinAuthForm.ErrorDialog(Owner,
+                        "Only time-based (TOTP) authenticators are supported when adding an Okta Verify Authenticator. Use the general \"Add Authenticator\" for counter-based (HOTP) authenticators.");
                     return false;
                 }
 
-                string label = match.Groups[2].Value;
-                if (string.IsNullOrEmpty(label) == false)
-                {
-                    this.Authenticator.Name = this.nameField.Text = label;
-                }
+                var label = match.Groups[2].Value;
+                if (string.IsNullOrEmpty(label) == false) Authenticator.Name = nameField.Text = label;
 
-                NameValueCollection qs = WinAuthHelper.ParseQueryString(match.Groups[3].Value);
+                var qs = WinAuthHelper.ParseQueryString(match.Groups[3].Value);
                 privatekey = qs["secret"] ?? privatekey;
             }
 
@@ -305,16 +281,16 @@ namespace WinAuth
             privatekey = Regex.Replace(privatekey, @"[^0-9a-z]", "", RegexOptions.IgnoreCase);
             if (privatekey.Length == 0)
             {
-                WinAuthForm.ErrorDialog(this.Owner, "The secret code is not valid");
+                WinAuthForm.ErrorDialog(Owner, "The secret code is not valid");
                 return false;
             }
 
             try
             {
-                OktaVerifyAuthenticator authenticator = new OktaVerifyAuthenticator();
+                var authenticator = new OktaVerifyAuthenticator();
                 authenticator.Enroll(privatekey);
-                this.Authenticator.AuthenticatorData = authenticator;
-                this.Authenticator.Name = this.nameField.Text;
+                Authenticator.AuthenticatorData = authenticator;
+                Authenticator.Name = nameField.Text;
 
                 codeField.Text = authenticator.CurrentCode;
                 newAuthenticatorProgress.Visible = true;
@@ -322,7 +298,7 @@ namespace WinAuth
             }
             catch (Exception ex)
             {
-                WinAuthForm.ErrorDialog(this.Owner, "Unable to create the authenticator: " + ex.Message, ex);
+                WinAuthForm.ErrorDialog(Owner, "Unable to create the authenticator: " + ex.Message, ex);
                 return false;
             }
 

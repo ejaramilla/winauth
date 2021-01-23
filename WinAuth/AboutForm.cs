@@ -17,97 +17,86 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Windows.Forms;
+using System.Reflection;
 using System.Xml;
-
-using WinAuth.Resources;
 
 namespace WinAuth
 {
-	/// <summary>
-	/// Show the About form
-	/// </summary>
-	public partial class AboutForm : ResourceForm
-	{
-		/// <summary>
-		/// Current config object
-		/// </summary>
-		public WinAuthConfig Config { get; set; }
+    /// <summary>
+    ///     Show the About form
+    /// </summary>
+    public partial class AboutForm : ResourceForm
+    {
+        /// <summary>
+        ///     Create the form
+        /// </summary>
+        public AboutForm()
+        {
+            InitializeComponent();
+        }
 
-		/// <summary>
-		/// Create the form
-		/// </summary>
-		public AboutForm()
-		{
-			InitializeComponent();
-		}
+        /// <summary>
+        ///     Current config object
+        /// </summary>
+        public WinAuthConfig Config { get; set; }
 
-		/// <summary>
-		/// Load the about form
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void AboutForm_Load(object sender, EventArgs e)
-		{
-			// get the version of the application
-			Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-			string debug = string.Empty;
+        /// <summary>
+        ///     Load the about form
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AboutForm_Load(object sender, EventArgs e)
+        {
+            // get the version of the application
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var debug = string.Empty;
 #if BETA
-			debug += " (BETA)";
+            debug += " (BETA)";
 #endif
 #if DEBUG
-			debug += " (DEBUG)";
+            debug += " (DEBUG)";
 #endif
-			this.aboutLabel.Text = string.Format(this.aboutLabel.Text, version.ToString(3) + debug, DateTime.Today.Year);
-		}
+            aboutLabel.Text = string.Format(aboutLabel.Text, version.ToString(3) + debug, DateTime.Today.Year);
+        }
 
-		/// <summary>
-		/// Click the close button
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void closeButton_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
+        /// <summary>
+        ///     Click the close button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void closeButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
 
-		/// <summary>
-		/// Click the report button
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void reportButton_Click(object sender, EventArgs e)
-		{
-			// display the error form, loading it with current authenticator data
-			DiagnosticForm errorreport = new DiagnosticForm();
-			errorreport.Config = Config;
-			if (string.IsNullOrEmpty(errorreport.Config.Filename) == false)
-			{
-				errorreport.ConfigFileContents = File.ReadAllText(errorreport.Config.Filename);
-			}
-			else
-			{
-				using (MemoryStream ms = new MemoryStream())
-				{
-					XmlWriterSettings settings = new XmlWriterSettings();
-					settings.Indent = true;
-					using (XmlWriter writer = XmlWriter.Create(ms, settings))
-					{
-						Config.WriteXmlString(writer);
-					}
-					ms.Position = 0;
-					errorreport.ConfigFileContents = new StreamReader(ms).ReadToEnd();
-				}
-			}
-			errorreport.ShowDialog(this);
-		}
-	}
+        /// <summary>
+        ///     Click the report button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void reportButton_Click(object sender, EventArgs e)
+        {
+            // display the error form, loading it with current authenticator data
+            var errorreport = new DiagnosticForm();
+            errorreport.Config = Config;
+            if (string.IsNullOrEmpty(errorreport.Config.Filename) == false)
+                errorreport.ConfigFileContents = File.ReadAllText(errorreport.Config.Filename);
+            else
+                using (var ms = new MemoryStream())
+                {
+                    var settings = new XmlWriterSettings();
+                    settings.Indent = true;
+                    using (var writer = XmlWriter.Create(ms, settings))
+                    {
+                        Config.WriteXmlString(writer);
+                    }
+
+                    ms.Position = 0;
+                    errorreport.ConfigFileContents = new StreamReader(ms).ReadToEnd();
+                }
+
+            errorreport.ShowDialog(this);
+        }
+    }
 }

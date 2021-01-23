@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("InputSimulator")]
-[assembly: AssemblyDescription("Provides a useful wrapper around the User32 SendInput and related native Windows functions.")]
+[assembly:
+    AssemblyDescription("Provides a useful wrapper around the User32 SendInput and related native Windows functions.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("michaelnoonan")]
 [assembly: AssemblyProduct("InputSimulator")]

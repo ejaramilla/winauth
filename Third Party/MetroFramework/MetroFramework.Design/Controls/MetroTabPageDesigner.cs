@@ -33,6 +33,5 @@ namespace MetroFramework.Design.Controls
 {
     internal class MetroTabPageDesigner : ScrollableControlDesigner
     {
-
     }
 }

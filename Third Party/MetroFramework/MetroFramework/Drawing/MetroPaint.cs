@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -29,16 +30,16 @@ namespace MetroFramework.Drawing
 {
     public class MetroPaintEventArgs : EventArgs
     {
-        public Color BackColor { get; private set; }
-        public Color ForeColor { get; private set; }
-        public Graphics Graphics { get; private set; }
-
         public MetroPaintEventArgs(Color backColor, Color foreColor, Graphics g)
         {
             BackColor = backColor;
             ForeColor = foreColor;
             Graphics = g;
         }
+
+        public Color BackColor { get; }
+        public Color ForeColor { get; }
+        public Graphics Graphics { get; }
     }
 
     public sealed class MetroPaint
@@ -461,6 +462,14 @@ namespace MetroFramework.Drawing
 
         public sealed class ForeColor
         {
+            public static Color Title(MetroThemeStyle theme)
+            {
+                if (theme == MetroThemeStyle.Dark)
+                    return Color.FromArgb(255, 255, 255);
+
+                return Color.FromArgb(0, 0, 0);
+            }
+
             public sealed class Button
             {
                 public static Color Normal(MetroThemeStyle theme)
@@ -494,14 +503,6 @@ namespace MetroFramework.Drawing
 
                     return Color.FromArgb(136, 136, 136);
                 }
-            }
-
-            public static Color Title(MetroThemeStyle theme)
-            {
-                if (theme == MetroThemeStyle.Dark)
-                    return Color.FromArgb(255, 255, 255);
-
-                return Color.FromArgb(0, 0, 0);
             }
 
             public sealed class Tile
@@ -815,7 +816,7 @@ namespace MetroFramework.Drawing
 
                 case MetroColorStyle.White:
                     return MetroPens.White;
-                
+
                 case MetroColorStyle.Silver:
                     return MetroPens.Silver;
 
@@ -859,7 +860,7 @@ namespace MetroFramework.Drawing
 
         public static StringFormat GetStringFormat(ContentAlignment textAlign)
         {
-            StringFormat stringFormat = new StringFormat();
+            var stringFormat = new StringFormat();
             stringFormat.Trimming = StringTrimming.EllipsisCharacter;
 
             switch (textAlign)
@@ -909,7 +910,7 @@ namespace MetroFramework.Drawing
 
         public static TextFormatFlags GetTextFormatFlags(ContentAlignment textAlign)
         {
-					TextFormatFlags controlFlags = TextFormatFlags.EndEllipsis;
+            var controlFlags = TextFormatFlags.EndEllipsis;
 
             switch (textAlign)
             {

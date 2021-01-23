@@ -21,25 +21,21 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Collections;
-using System.ComponentModel;
+using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using MetroFramework.Controls;
 
 namespace MetroFramework.Design.Controls
 {
     internal class MetroTileDesigner : ParentControlDesigner
     {
-        public override SelectionRules SelectionRules
-        {
-            get
-            {
-                return base.SelectionRules;
-            }
-        }
+        public override SelectionRules SelectionRules => base.SelectionRules;
 
-        public override bool CanParent(System.Windows.Forms.Control control)
+        public override bool CanParent(Control control)
         {
-            return (control is MetroFramework.Controls.MetroLabel || control is MetroFramework.Controls.MetroProgressSpinner);
+            return control is MetroLabel || control is MetroProgressSpinner;
         }
 
         protected override void PreFilterProperties(IDictionary properties)

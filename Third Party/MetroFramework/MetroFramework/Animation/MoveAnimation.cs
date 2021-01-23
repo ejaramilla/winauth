@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -33,23 +34,20 @@ namespace MetroFramework.Animation
             base.Start(control, transitionType, duration,
                 delegate
                 {
-                    int x = DoMoveAnimation(control.Location.X, targetPoint.X);
-                    int y = DoMoveAnimation(control.Location.Y, targetPoint.Y);
+                    var x = DoMoveAnimation(control.Location.X, targetPoint.X);
+                    var y = DoMoveAnimation(control.Location.Y, targetPoint.Y);
 
                     control.Location = new Point(x, y);
                 },
-                delegate
-                {
-                    return (control.Location.Equals(targetPoint));
-                });
+                delegate { return control.Location.Equals(targetPoint); });
         }
 
         private int DoMoveAnimation(int startPos, int targetPos)
         {
-            float t = (float)counter - startTime;
-            float b = (float)startPos;
-            float c = (float)targetPos - startPos;
-            float d = (float)targetTime - startTime;
+            var t = (float) counter - startTime;
+            float b = startPos;
+            var c = (float) targetPos - startPos;
+            var d = (float) targetTime - startTime;
 
             return MakeTransition(t, b, d, c);
         }

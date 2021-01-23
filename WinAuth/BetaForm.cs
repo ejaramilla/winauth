@@ -17,62 +17,57 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace WinAuth
 {
-	/// <summary>
-	/// General Beta form
-	/// </summary>
-	public partial class BetaForm : ResourceForm
-	{
-		/// <summary>
-		/// Create the  Form
-		/// </summary>
-		public BetaForm()
-		{
-			InitializeComponent();
-		}
+    /// <summary>
+    ///     General Beta form
+    /// </summary>
+    public partial class BetaForm : ResourceForm
+    {
+        /// <summary>
+        ///     Create the  Form
+        /// </summary>
+        public BetaForm()
+        {
+            InitializeComponent();
+        }
 
-		/// <summary>
-		/// Click the OK button
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void btnOK_Click(object sender, EventArgs e)
-		{
-			if (this.ckAgree.Checked == true)
-			{
-				this.DialogResult = System.Windows.Forms.DialogResult.OK;
-				this.Close();
-			}
-		}
+        /// <summary>
+        ///     Click the OK button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            if (ckAgree.Checked)
+            {
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+        }
 
-		/// <summary>
-		/// Check the agree tickbox
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void ckAgree_CheckedChanged(object sender, EventArgs e)
-		{
-			btnOK.Enabled = ckAgree.Checked;
-		}
+        /// <summary>
+        ///     Check the agree tickbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ckAgree_CheckedChanged(object sender, EventArgs e)
+        {
+            btnOK.Enabled = ckAgree.Checked;
+        }
 
-		/// <summary>
-		/// Load the form
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void BetaForm_Load(object sender, EventArgs e)
-		{
-			Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-			this.Text = string.Format(this.Text, version.ToString(3), DateTime.Today.Year);
-		}
-
-	}
+        /// <summary>
+        ///     Load the form
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BetaForm_Load(object sender, EventArgs e)
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            Text = string.Format(Text, version.ToString(3), DateTime.Today.Year);
+        }
+    }
 }

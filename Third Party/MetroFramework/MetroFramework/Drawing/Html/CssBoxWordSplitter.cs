@@ -24,34 +24,33 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
+
 using System.Collections.Generic;
-using System.Text;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Splits text on words for a box
+    ///     Splits text on words for a box
     /// </summary>
     internal class CssBoxWordSplitter
     {
         #region Static
 
         /// <summary>
-        /// Returns a bool indicating if the specified box white-space processing model specifies
-        /// that sequences of white spaces should be collapsed on a single whitespace
+        ///     Returns a bool indicating if the specified box white-space processing model specifies
+        ///     that sequences of white spaces should be collapsed on a single whitespace
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
         public static bool CollapsesWhiteSpaces(CssBox b)
         {
             return b.WhiteSpace == CssConstants.Normal ||
-                b.WhiteSpace == CssConstants.Nowrap ||
-                b.WhiteSpace == CssConstants.PreLine;
+                   b.WhiteSpace == CssConstants.Nowrap ||
+                   b.WhiteSpace == CssConstants.PreLine;
         }
 
         /// <summary>
-        /// Returns a bool indicating if line breaks at the source should be eliminated
+        ///     Returns a bool indicating if line breaks at the source should be eliminated
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
@@ -63,9 +62,7 @@ namespace MetroFramework.Drawing.Html
         #endregion
 
         #region Fields
-        private CssBox _box;
-        private string _text;
-        private List<CssBoxWord> _words;
+
         private CssBoxWord _curword;
 
         #endregion
@@ -74,60 +71,48 @@ namespace MetroFramework.Drawing.Html
 
         private CssBoxWordSplitter()
         {
-            _words = new List<CssBoxWord>();
+            Words = new List<CssBoxWord>();
             _curword = null;
         }
 
         public CssBoxWordSplitter(CssBox box, string text)
             : this()
         {
-            _box = box;
-            _text = text.Replace("\r", string.Empty); ;
+            Box = box;
+            Text = text.Replace("\r", string.Empty);
+            ;
         }
 
         #endregion
 
         #region Props
 
-
-        public List<CssBoxWord> Words
-        {
-            get { return _words; }
-        }
+        public List<CssBoxWord> Words { get; }
 
 
-        public string Text
-        {
-            get { return _text; }
-        }
+        public string Text { get; }
 
 
-        public CssBox Box
-        {
-            get { return _box; }
-        }
-
+        public CssBox Box { get; }
 
         #endregion
 
         #region Public Metods
 
         /// <summary>
-        /// Splits the text on words using rules of the specified box
+        ///     Splits the text on words using rules of the specified box
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
         public void SplitWords()
         {
-
             if (string.IsNullOrEmpty(Text)) return;
 
             _curword = new CssBoxWord(Box);
 
-            bool onspace = IsSpace(Text[0]);
+            var onspace = IsSpace(Text[0]);
 
-            for (int i = 0; i < Text.Length; i++)
-            {
+            for (var i = 0; i < Text.Length; i++)
                 if (IsSpace(Text[i]))
                 {
                     if (!onspace) CutWord();
@@ -156,14 +141,13 @@ namespace MetroFramework.Drawing.Html
 
                     onspace = false;
                 }
-            }
 
             CutWord();
         }
 
         private void CutWord()
         {
-            if(_curword.Text.Length > 0)
+            if (_curword.Text.Length > 0)
                 Words.Add(_curword);
             _curword = new CssBoxWord(Box);
         }
@@ -185,5 +169,4 @@ namespace MetroFramework.Drawing.Html
 
         #endregion
     }
-
 }

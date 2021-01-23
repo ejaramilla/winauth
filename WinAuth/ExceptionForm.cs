@@ -17,64 +17,55 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Reflection;
-using System.Security;
-using System.Security.Cryptography;
-using System.Windows.Forms;
+using System.Text;
 using System.Xml;
-using System.Net;
-using System.Web;
-
 using WinAuth.Resources;
 
 namespace WinAuth
 {
-	/// <summary>
-	/// General error report form
-	/// </summary>
-	public partial class ExceptionForm : WinAuth.ResourceForm
-	{
-		/// <summary>
-		/// Exception that caused the error report
-		/// </summary>
-		public Exception ErrorException { get; set; }
+    /// <summary>
+    ///     General error report form
+    /// </summary>
+    public partial class ExceptionForm : ResourceForm
+    {
+        /// <summary>
+        ///     Create the  Form
+        /// </summary>
+        public ExceptionForm()
+        {
+            InitializeComponent();
+        }
 
-		/// <summary>
-		/// Current config
-		/// </summary>
-		public WinAuthConfig Config { get; set; }
+        /// <summary>
+        ///     Exception that caused the error report
+        /// </summary>
+        public Exception ErrorException { get; set; }
 
-		/// <summary>
-		/// Create the  Form
-		/// </summary>
-		public ExceptionForm()
-		{
-			InitializeComponent();
-		}
+        /// <summary>
+        ///     Current config
+        /// </summary>
+        public WinAuthConfig Config { get; set; }
 
-		/// <summary>
-		/// Load the error report form
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void ExceptionForm_Load(object sender, EventArgs e)
-		{
-			errorIcon.Image = SystemIcons.Error.ToBitmap();
-			this.Height = detailsButton.Top + detailsButton.Height + 45;
+        /// <summary>
+        ///     Load the error report form
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExceptionForm_Load(object sender, EventArgs e)
+        {
+            errorIcon.Image = SystemIcons.Error.ToBitmap();
+            Height = detailsButton.Top + detailsButton.Height + 45;
 
-			this.errorLabel.Text = string.Format(this.errorLabel.Text, (ErrorException != null ? ErrorException.Message : strings.UnknownError));
+            errorLabel.Text = string.Format(errorLabel.Text,
+                ErrorException != null ? ErrorException.Message : strings.UnknownError);
 
-			// build data
+            // build data
 #if DEBUG
-			dataText.Text = string.Format("{0}\n\n{1}", this.ErrorException.Message, new System.Diagnostics.StackTrace(this.ErrorException).ToString());
+            dataText.Text = string.Format("{0}\n\n{1}", ErrorException.Message, new StackTrace(ErrorException));
 #else
 			try
 			{
@@ -82,140 +73,147 @@ namespace WinAuth
 			}
 			catch (Exception ex)
 			{
-				dataText.Text = string.Format("{0}\n\n{1}", ex.Message, new System.Diagnostics.StackTrace(ex).ToString());
+				dataText.Text =
+ string.Format("{0}\n\n{1}", ex.Message, new System.Diagnostics.StackTrace(ex).ToString());
 			}
 #endif
-		}
+        }
 
-		/// <summary>
-		/// Build a diagnostics string for the current Config and any exception that had been thrown
-		/// </summary>
-		/// <returns>diagnostics information</returns>
-		private string BuildDiagnostics()
-		{
-			StringBuilder diag = new StringBuilder();
+        /// <summary>
+        ///     Build a diagnostics string for the current Config and any exception that had been thrown
+        /// </summary>
+        /// <returns>diagnostics information</returns>
+        private string BuildDiagnostics()
+        {
+            var diag = new StringBuilder();
 
-			Version version;
+            Version version;
 #if NETFX_4
-			if (Version.TryParse(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion, out version) == true)
-			{
-				diag.Append("Version:" + version.ToString(4));
-			}
+            if (Version.TryParse(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion,
+                out version)) diag.Append("Version:" + version.ToString(4));
 #endif
 
-			// add winauth log
-			try
-			{
-				string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
-				if (Directory.Exists(dir) == true)
-				{
-					string winauthlog = Path.Combine(dir, "winauth.log");
-					if (File.Exists(winauthlog) == true)
-					{
-						diag.Append("--WINAUTH.LOG--").Append(Environment.NewLine);
-						diag.Append(File.ReadAllText(winauthlog)).Append(Environment.NewLine).Append(Environment.NewLine);
-					}
+            // add winauth log
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    WinAuthMain.APPLICATION_NAME);
+                if (Directory.Exists(dir))
+                {
+                    var winauthlog = Path.Combine(dir, "winauth.log");
+                    if (File.Exists(winauthlog))
+                    {
+                        diag.Append("--WINAUTH.LOG--").Append(Environment.NewLine);
+                        diag.Append(File.ReadAllText(winauthlog)).Append(Environment.NewLine)
+                            .Append(Environment.NewLine);
+                    }
 
-					// add authenticator.xml
-					foreach (string file in Directory.GetFiles(dir, "*.xml"))
-					{
-						diag.Append("--" + file + "--").Append(Environment.NewLine);
-						diag.Append(File.ReadAllText(file)).Append(Environment.NewLine).Append(Environment.NewLine);
-					}
-				}
-			}
-			catch (Exception) { }
+                    // add authenticator.xml
+                    foreach (var file in Directory.GetFiles(dir, "*.xml"))
+                    {
+                        diag.Append("--" + file + "--").Append(Environment.NewLine);
+                        diag.Append(File.ReadAllText(file)).Append(Environment.NewLine).Append(Environment.NewLine);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
 
-			// add the current config
-			if (this.Config != null)
-			{
-				using (var ms = new MemoryStream())
-				{
-					XmlWriterSettings settings = new XmlWriterSettings();
-					settings.Indent = true;
-					using (var xml = XmlWriter.Create(ms, settings))
-					{
-						this.Config.WriteXmlString(xml);
-					}
+            // add the current config
+            if (Config != null)
+                using (var ms = new MemoryStream())
+                {
+                    var settings = new XmlWriterSettings();
+                    settings.Indent = true;
+                    using (var xml = XmlWriter.Create(ms, settings))
+                    {
+                        Config.WriteXmlString(xml);
+                    }
 
-					ms.Position = 0;
+                    ms.Position = 0;
 
-					diag.Append("-- Config --").Append(Environment.NewLine);
-					diag.Append(new StreamReader(ms).ReadToEnd()).Append(Environment.NewLine).Append(Environment.NewLine);
-				}
-			}
+                    diag.Append("-- Config --").Append(Environment.NewLine);
+                    diag.Append(new StreamReader(ms).ReadToEnd()).Append(Environment.NewLine)
+                        .Append(Environment.NewLine);
+                }
 
-			// add the exception
-			if (ErrorException != null)
-			{
-				diag.Append("--EXCEPTION--").Append(Environment.NewLine);
+            // add the exception
+            if (ErrorException != null)
+            {
+                diag.Append("--EXCEPTION--").Append(Environment.NewLine);
 
-				Exception ex = ErrorException;
-				while (ex != null)
-				{
-					diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new System.Diagnostics.StackTrace(ex).ToString()).Append(Environment.NewLine);
-					ex = ex.InnerException;
-				}
-				if (ErrorException is InvalidEncryptionException)
-				{
-					diag.Append("Plain: " + ((InvalidEncryptionException)ErrorException).Plain).Append(Environment.NewLine);
-					diag.Append("Password: " + ((InvalidEncryptionException)ErrorException).Password).Append(Environment.NewLine);
-					diag.Append("Encrypted: " + ((InvalidEncryptionException)ErrorException).Encrypted).Append(Environment.NewLine);
-					diag.Append("Decrypted: " + ((InvalidEncryptionException)ErrorException).Decrypted).Append(Environment.NewLine);
-				}
-				else if (ErrorException is InvalidSecretDataException)
-				{
-					diag.Append("EncType: " + ((InvalidSecretDataException)ErrorException).EncType).Append(Environment.NewLine);
-					diag.Append("Password: " + ((InvalidSecretDataException)ErrorException).Password).Append(Environment.NewLine);
-					foreach (string data in ((InvalidSecretDataException)ErrorException).Decrypted)
-					{
-						diag.Append("Data: " + data).Append(Environment.NewLine);
-					}
-				}
-			}
+                var ex = ErrorException;
+                while (ex != null)
+                {
+                    diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new StackTrace(ex))
+                        .Append(Environment.NewLine);
+                    ex = ex.InnerException;
+                }
 
-			return diag.ToString();
-		}
+                if (ErrorException is InvalidEncryptionException)
+                {
+                    diag.Append("Plain: " + ((InvalidEncryptionException) ErrorException).Plain)
+                        .Append(Environment.NewLine);
+                    diag.Append("Password: " + ((InvalidEncryptionException) ErrorException).Password)
+                        .Append(Environment.NewLine);
+                    diag.Append("Encrypted: " + ((InvalidEncryptionException) ErrorException).Encrypted)
+                        .Append(Environment.NewLine);
+                    diag.Append("Decrypted: " + ((InvalidEncryptionException) ErrorException).Decrypted)
+                        .Append(Environment.NewLine);
+                }
+                else if (ErrorException is InvalidSecretDataException)
+                {
+                    diag.Append("EncType: " + ((InvalidSecretDataException) ErrorException).EncType)
+                        .Append(Environment.NewLine);
+                    diag.Append("Password: " + ((InvalidSecretDataException) ErrorException).Password)
+                        .Append(Environment.NewLine);
+                    foreach (var data in ((InvalidSecretDataException) ErrorException).Decrypted)
+                        diag.Append("Data: " + data).Append(Environment.NewLine);
+                }
+            }
 
-		/// <summary>
-		/// Click the Quit button
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void quitButton_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
+            return diag.ToString();
+        }
 
-		/// <summary>
-		/// Click the Continue button
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void continueButton_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
+        /// <summary>
+        ///     Click the Quit button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void quitButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
 
-		/// <summary>
-		/// Click to show the details
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void detailsButton_Click(object sender, EventArgs e)
-		{
-			dataText.Visible = !dataText.Visible;
-			if (dataText.Visible == true)
-			{
-				this.detailsButton.Text = strings.HideDetails;
-				this.Height += 160;
-			}
-			else
-			{
-				this.detailsButton.Text = strings._ExceptionForm_detailsButton_;
-				this.Height -= 160;
-			}
-		}
+        /// <summary>
+        ///     Click the Continue button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void continueButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
 
-	}
+        /// <summary>
+        ///     Click to show the details
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void detailsButton_Click(object sender, EventArgs e)
+        {
+            dataText.Visible = !dataText.Visible;
+            if (dataText.Visible)
+            {
+                detailsButton.Text = strings.HideDetails;
+                Height += 160;
+            }
+            else
+            {
+                detailsButton.Text = strings._ExceptionForm_detailsButton_;
+                Height -= 160;
+            }
+        }
+    }
 }

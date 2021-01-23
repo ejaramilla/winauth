@@ -24,29 +24,19 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing.Drawing2D;
+
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace MetroFramework.Drawing.Html
 {
     /// <summary>
-    /// Provides some drawing functionallity
+    ///     Provides some drawing functionallity
     /// </summary>
     internal static class CssDrawingHelper
     {
         /// <summary>
-        /// Border specifiers
-        /// </summary>
-        internal enum Border
-        {
-            Top, Right, Bottom, Left
-        }
-
-        /// <summary>
-        /// Rounds the specified point
+        ///     Rounds the specified point
         /// </summary>
         /// <param name="p"></param>
         /// <param name="b"></param>
@@ -59,7 +49,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Rounds the specified rectangle
+        ///     Rounds the specified rectangle
         /// </summary>
         /// <param name="p"></param>
         /// <param name="b"></param>
@@ -71,16 +61,17 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Makes a border path
+        ///     Makes a border path
         /// </summary>
         /// <param name="border">Desired border</param>
         /// <param name="b">Box wich the border corresponds</param>
         /// <param name="isLineStart">Specifies if the border is for a starting line (no bevel on left)</param>
         /// <param name="isLineEnd">Specifies if the border is for an ending line (no bevel on right)</param>
         /// <returns>Beveled border path</returns>
-        public static GraphicsPath GetBorderPath(Border border, CssBox b, RectangleF r, bool isLineStart, bool isLineEnd)
+        public static GraphicsPath GetBorderPath(Border border, CssBox b, RectangleF r, bool isLineStart,
+            bool isLineEnd)
         {
-            PointF[] pts = new PointF[4];
+            var pts = new PointF[4];
             float bwidth = 0;
             GraphicsPath corner = null;
 
@@ -97,7 +88,7 @@ namespace MetroFramework.Drawing.Html
                     if (isLineStart && b.ActualCornerNW == 0f) pts[3].X += b.ActualBorderLeftWidth;
 
                     if (b.ActualCornerNW > 0f) corner = CreateCorner(b, r, 1);
-                    
+
                     break;
                 case Border.Right:
                     bwidth = b.ActualBorderRightWidth;
@@ -105,10 +96,10 @@ namespace MetroFramework.Drawing.Html
                     pts[1] = RoundP(new PointF(r.Right, r.Top + b.ActualCornerNE), b);
                     pts[2] = RoundP(new PointF(r.Right, r.Bottom - b.ActualCornerSE), b);
                     pts[3] = RoundP(new PointF(r.Right - bwidth, r.Bottom - b.ActualCornerSE), b);
-                    
-                   
+
+
                     if (b.ActualCornerNE == 0f) pts[0].Y += b.ActualBorderTopWidth;
-                    if (b.ActualCornerSE == 0f) pts[3].Y -= b.ActualBorderBottomWidth; 
+                    if (b.ActualCornerSE == 0f) pts[3].Y -= b.ActualBorderBottomWidth;
                     if (b.ActualCornerNE > 0f) corner = CreateCorner(b, r, 2);
                     break;
                 case Border.Bottom:
@@ -137,18 +128,20 @@ namespace MetroFramework.Drawing.Html
                     break;
             }
 
-            GraphicsPath path = new GraphicsPath(pts, new byte[] { (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line });
+            var path = new GraphicsPath(pts,
+                new[]
+                {
+                    (byte) PathPointType.Line, (byte) PathPointType.Line, (byte) PathPointType.Line,
+                    (byte) PathPointType.Line
+                });
 
-            if (corner != null)
-            {
-                path.AddPath(corner, true);
-            }
+            if (corner != null) path.AddPath(corner, true);
 
             return path;
         }
 
         /// <summary>
-        /// Creates the corner to place with the borders
+        ///     Creates the corner to place with the borders
         /// </summary>
         /// <param name="outer"></param>
         /// <param name="inner"></param>
@@ -157,10 +150,10 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private static GraphicsPath CreateCorner(CssBox b, RectangleF r, int cornerIndex)
         {
-            GraphicsPath corner = new GraphicsPath();
+            var corner = new GraphicsPath();
 
-            RectangleF outer = RectangleF.Empty;
-            RectangleF inner = RectangleF.Empty;
+            var outer = RectangleF.Empty;
+            var inner = RectangleF.Empty;
             float start1 = 0;
             float start2 = 0;
 
@@ -168,21 +161,25 @@ namespace MetroFramework.Drawing.Html
             {
                 case 1:
                     outer = new RectangleF(r.Left, r.Top, b.ActualCornerNW, b.ActualCornerNW);
-                    inner = RectangleF.FromLTRB(outer.Left + b.ActualBorderLeftWidth, outer.Top + b.ActualBorderTopWidth, outer.Right, outer.Bottom);
+                    inner = RectangleF.FromLTRB(outer.Left + b.ActualBorderLeftWidth,
+                        outer.Top + b.ActualBorderTopWidth, outer.Right, outer.Bottom);
                     start1 = 180;
                     start2 = 270;
                     break;
                 case 2:
                     outer = new RectangleF(r.Right - b.ActualCornerNE, r.Top, b.ActualCornerNE, b.ActualCornerNE);
-                    inner = RectangleF.FromLTRB(outer.Left, outer.Top + b.ActualBorderTopWidth, outer.Right - b.ActualBorderRightWidth, outer.Bottom);
+                    inner = RectangleF.FromLTRB(outer.Left, outer.Top + b.ActualBorderTopWidth,
+                        outer.Right - b.ActualBorderRightWidth, outer.Bottom);
                     outer.X -= outer.Width;
                     inner.X -= inner.Width;
                     start1 = -90;
                     start2 = 0;
                     break;
                 case 3:
-                    outer = RectangleF.FromLTRB(r.Right - b.ActualCornerSE, r.Bottom - b.ActualCornerSE, r.Right, r.Bottom);
-                    inner = new RectangleF(outer.Left, outer.Top, outer.Width - b.ActualBorderRightWidth, outer.Height - b.ActualBorderBottomWidth);
+                    outer = RectangleF.FromLTRB(r.Right - b.ActualCornerSE, r.Bottom - b.ActualCornerSE, r.Right,
+                        r.Bottom);
+                    inner = new RectangleF(outer.Left, outer.Top, outer.Width - b.ActualBorderRightWidth,
+                        outer.Height - b.ActualBorderBottomWidth);
                     outer.X -= outer.Width;
                     outer.Y -= outer.Height;
                     inner.X -= inner.Width;
@@ -192,7 +189,8 @@ namespace MetroFramework.Drawing.Html
                     break;
                 case 4:
                     outer = new RectangleF(r.Left, r.Bottom - b.ActualCornerSW, b.ActualCornerSW, b.ActualCornerSW);
-                    inner = RectangleF.FromLTRB( r.Left + b.ActualBorderLeftWidth , outer.Top , outer.Right, outer.Bottom - b.ActualBorderBottomWidth);
+                    inner = RectangleF.FromLTRB(r.Left + b.ActualBorderLeftWidth, outer.Top, outer.Right,
+                        outer.Bottom - b.ActualBorderBottomWidth);
                     start1 = 90;
                     start2 = 180;
                     outer.Y -= outer.Height;
@@ -206,10 +204,13 @@ namespace MetroFramework.Drawing.Html
             if (inner.Height <= 0f) inner.Height = 1f;
 
 
-            outer.Width *= 2; outer.Height *= 2;
-            inner.Width *= 2; inner.Height *= 2;
+            outer.Width *= 2;
+            outer.Height *= 2;
+            inner.Width *= 2;
+            inner.Height *= 2;
 
-            outer = RoundR(outer, b); inner = RoundR(inner, b);
+            outer = RoundR(outer, b);
+            inner = RoundR(inner, b);
 
             corner.AddArc(outer, start1, 90);
             corner.AddArc(inner, start2, -90);
@@ -220,7 +221,7 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Creates a rounded rectangle using the specified corner radius
+        ///     Creates a rounded rectangle using the specified corner radius
         /// </summary>
         /// <param name="rect">Rectangle to round</param>
         /// <param name="nwRadius">Radius of the north east corner</param>
@@ -228,14 +229,15 @@ namespace MetroFramework.Drawing.Html
         /// <param name="seRadius">Radius of the south east corner</param>
         /// <param name="swRadius">Radius of the south west corner</param>
         /// <returns>GraphicsPath with the lines of the rounded rectangle ready to be painted</returns>
-        public static GraphicsPath GetRoundRect(RectangleF rect, float nwRadius, float neRadius, float seRadius, float swRadius)
+        public static GraphicsPath GetRoundRect(RectangleF rect, float nwRadius, float neRadius, float seRadius,
+            float swRadius)
         {
             ///  NW-----NE
             ///  |       |
             ///  |       |
             ///  SW-----SE
 
-            GraphicsPath path = new GraphicsPath();
+            var path = new GraphicsPath();
 
             nwRadius *= 2;
             neRadius *= 2;
@@ -244,14 +246,12 @@ namespace MetroFramework.Drawing.Html
 
             //NW ---- NE
             path.AddLine(rect.X + nwRadius, rect.Y, rect.Right - neRadius, rect.Y);
-            
+
             //NE Arc
             if (neRadius > 0f)
-            {
                 path.AddArc(
                     RectangleF.FromLTRB(rect.Right - neRadius, rect.Top, rect.Right, rect.Top + neRadius),
                     -90, 90);
-            }
 
             // NE
             //  |
@@ -260,22 +260,18 @@ namespace MetroFramework.Drawing.Html
 
             //SE Arc
             if (seRadius > 0f)
-            {
                 path.AddArc(
                     RectangleF.FromLTRB(rect.Right - seRadius, rect.Bottom - seRadius, rect.Right, rect.Bottom),
                     0, 90);
-            }
 
             // SW --- SE
             path.AddLine(rect.Right - seRadius, rect.Bottom, rect.Left + swRadius, rect.Bottom);
 
             //SW Arc
             if (swRadius > 0f)
-            {
                 path.AddArc(
                     RectangleF.FromLTRB(rect.Left, rect.Bottom - swRadius, rect.Left + swRadius, rect.Bottom),
                     90, 90);
-            }
 
             // NW
             // |
@@ -284,11 +280,9 @@ namespace MetroFramework.Drawing.Html
 
             //NW Arc
             if (nwRadius > 0f)
-            {
                 path.AddArc(
                     RectangleF.FromLTRB(rect.Left, rect.Top, rect.Left + nwRadius, rect.Top + nwRadius),
                     180, 90);
-            }
 
             path.CloseFigure();
 
@@ -296,13 +290,24 @@ namespace MetroFramework.Drawing.Html
         }
 
         /// <summary>
-        /// Makes the specified color darker
+        ///     Makes the specified color darker
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
         public static Color Darken(Color c)
         {
             return Color.FromArgb(c.R / 2, c.G / 2, c.B / 2);
+        }
+
+        /// <summary>
+        ///     Border specifiers
+        /// </summary>
+        internal enum Border
+        {
+            Top,
+            Right,
+            Bottom,
+            Left
         }
     }
 }

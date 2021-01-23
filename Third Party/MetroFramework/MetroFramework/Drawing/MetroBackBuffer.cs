@@ -21,9 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -33,7 +31,7 @@ namespace MetroFramework.Drawing
 {
     internal sealed class MetroBackBuffer
     {
-        private Bitmap backBuffer;
+        private readonly Bitmap backBuffer;
 
         public MetroBackBuffer(Size bufferSize)
         {
@@ -42,7 +40,7 @@ namespace MetroFramework.Drawing
 
         public Graphics CreateGraphics()
         {
-            Graphics g = Graphics.FromImage(backBuffer);
+            var g = Graphics.FromImage(backBuffer);
 
             g.CompositingMode = CompositingMode.SourceOver;
             g.CompositingQuality = CompositingQuality.HighQuality;
